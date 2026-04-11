@@ -465,6 +465,7 @@ export function BookingModal({ activity, open, onClose }: Props) {
               </p>
             </div>
 
+
             <Button onClick={handleClose} className="w-full bg-accent hover:bg-accent/90">Done</Button>
           </div>
         )}
