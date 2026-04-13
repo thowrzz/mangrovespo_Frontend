@@ -35,8 +35,8 @@ const STORAGE_KEY = "ms_customer"
 // ─── Provider ─────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState]   = useState<CustomerUser | null>(null)
-  const [loading, setLoading]  = useState(true)
+  const [user, setUserState]  = useState<CustomerUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
   // Restore from localStorage on mount
   useEffect(() => {
@@ -44,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed: CustomerUser = JSON.parse(raw)
-        // Quick expiry check — decode JWT payload
         if (_tokenAlive(parsed.token)) {
           setUserState(parsed)
         } else {
@@ -83,14 +82,35 @@ export function useAuth() {
 
 // ─── Helpers ──────────────────────────────────────────────────────
 
+/**
+ * Returns true if the token should be considered valid/alive.
+ *
+ * Supports two token formats:
+ *  - Opaque tokens (DRF Token, Knox): flat hex/alphanumeric strings with no dots.
+ *    These have no embedded expiry, so we just check they are non-empty.
+ *  - JWTs (3 dot-separated base64 segments): we decode the payload and compare `exp`.
+ *    If `exp` is absent we trust the token rather than reject it.
+ */
 function _tokenAlive(token: string): boolean {
+  if (!token || !token.trim()) return false
+
+  const parts = token.split(".")
+
+  // Opaque DRF token — no expiry to check, trust as valid
+  if (parts.length < 3) {
+    return true
+  }
+
+  // JWT path
   try {
-    const [, payload] = token.split(".")
-    const pad = 4 - (payload.length % 4)
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat(pad))
+    const payload = parts[1]
+    const padded  = payload + "=".repeat((4 - (payload.length % 4)) % 4)
+    const json    = atob(padded.replace(/-/g, "+").replace(/_/g, "/"))
     const { exp } = JSON.parse(json)
-    return Date.now() / 1000 < exp
+    // If no `exp` claim, treat token as non-expiring
+    return typeof exp === "number" ? Date.now() / 1000 < exp : true
   } catch {
+    // Malformed JWT — reject
     return false
   }
 }

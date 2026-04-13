@@ -1683,6 +1683,7 @@
 //     </main>
 //   )
 // }
+
 "use client"
 
 import { useState, useCallback, useEffect, useRef, memo } from "react"
@@ -1692,10 +1693,10 @@ import { format } from "date-fns"
 import { DayPicker } from "react-day-picker"
 import "react-day-picker/dist/style.css"
 import {
-  Trash2, Loader2, ShoppingCart, IndianRupee, ArrowLeft,
-  Plus, Check, Calendar, Clock, Users, Pencil, X, ChevronRight,
+  Loader2, ShoppingCart, IndianRupee, ArrowLeft,
+  Plus, Check, Calendar, Clock, Users, X,
   LogOut, Mail, ArrowRight, ShieldCheck, Baby, UserRound, Wallet,
-  ChevronDown, CheckCircle2, Circle,
+  ChevronDown,
 } from "lucide-react"
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google"
 import { Button } from "@/components/ui/button"
@@ -1714,17 +1715,39 @@ import { z } from "zod"
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""
 
 // ─── Operating hours ──────────────────────────────────────────────
-const OPEN_TIME  = "06:30"   // 6:30 AM
-const CLOSE_TIME = "17:00"   // 5:00 PM
+const OPEN_HOUR  = 6
+const OPEN_MIN   = 30
+const CLOSE_HOUR = 17
+const CLOSE_MIN  = 0
+
+// Build valid time slots every 15 minutes between 06:30 and 17:00
+function buildTimeSlots(): { hour: number; minute: number; label: string; value: string }[] {
+  const slots = []
+  for (let h = OPEN_HOUR; h <= CLOSE_HOUR; h++) {
+    const minStart = h === OPEN_HOUR  ? OPEN_MIN  : 0
+    const minEnd   = h === CLOSE_HOUR ? CLOSE_MIN : 45
+    for (let m = minStart; m <= minEnd; m += 15) {
+      const hh    = String(h).padStart(2, "0")
+      const mm    = String(m).padStart(2, "0")
+      const value = `${hh}:${mm}`
+      const ampm  = h < 12 ? "AM" : "PM"
+      const h12   = h === 0 ? 12 : h > 12 ? h - 12 : h
+      const label = `${h12}:${mm} ${ampm}`
+      slots.push({ hour: h, minute: m, label, value })
+    }
+  }
+  return slots
+}
+
+const TIME_SLOTS = buildTimeSlots()
 
 function isTimeInRange(time: string): boolean {
   if (!time) return false
-  return time >= OPEN_TIME && time <= CLOSE_TIME
-}
-
-function toMins(t: string): number {
-  const [h, m] = t.split(":").map(Number)
-  return h * 60 + m
+  const [h, m] = time.split(":").map(Number)
+  const mins      = h * 60 + m
+  const openMins  = OPEN_HOUR  * 60 + OPEN_MIN
+  const closeMins = CLOSE_HOUR * 60 + CLOSE_MIN
+  return mins >= openMins && mins <= closeMins
 }
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -1736,10 +1759,11 @@ function useRazorpayPreload() {
     if ((window as any).Razorpay) return
     if (document.querySelector('script[src*="razorpay"]')) return
     const s = document.createElement("script")
-    s.src = "https://checkout.razorpay.com/v1/checkout.js"
+    s.src   = "https://checkout.razorpay.com/v1/checkout.js"
     s.async = true
     document.body.appendChild(s)
   }, [])
+
   const ensureReady = (): Promise<boolean> =>
     new Promise(resolve => {
       if ((window as any).Razorpay) return resolve(true)
@@ -1749,28 +1773,31 @@ function useRazorpayPreload() {
         else if (Date.now() - t0 > 8000) { clearInterval(id); resolve(false) }
       }, 100)
     })
+
   return { ensureReady }
 }
 
 // ─── Image helpers ────────────────────────────────────────────────
 const FALLBACK: Record<string, string> = {
-  "Kayaking": "/Mangrove-Kayaking.jpg",
-  "Coracle Ride": "/Coracle-Ride.jpg",
-  "Country Boat Ride": "/Country-Boat.png",
-  "Bamboo Rafting": "/Country-Boat.png",
-  "Zip Line": "/combo.png",
-  "ATV Ride": "/ATV-Ride.jpg",
-  "Archery": "/arch.jpg",
-  "Fishing": "/stand.jpg",
-  "Nature Walk": "/Mangrove-Kayaking.jpg",
-  "Mud Activities": "/rain1.jpg",
-  "Tug of War": "/student-offer.jpg",
+  "Kayaking":             "/Mangrove-Kayaking.jpg",
+  "Coracle Ride":         "/Coracle-Ride.jpg",
+  "Country Boat Ride":    "/Country-Boat.png",
+  "Bamboo Rafting":       "/Country-Boat.png",
+  "Zip Line":             "/combo.png",
+  "ATV Ride":             "/ATV-Ride.jpg",
+  "Archery":              "/arch.jpg",
+  "Fishing":              "/stand.jpg",
+  "Nature Walk":          "/Mangrove-Kayaking.jpg",
+  "Mud Activities":       "/rain1.jpg",
+  "Tug of War":           "/student-offer.jpg",
   "Cultural Performance": "/combo.png",
 }
+
 function toHttps(url: string): string {
   if (!url) return url
   return url.startsWith("http://") ? url.replace("http://", "https://") : url
 }
+
 function activityImage(activity: Activity): string {
   return toHttps(activity.image_url || FALLBACK[activity.name] || "/combo.png")
 }
@@ -1786,21 +1813,25 @@ type FormData = z.infer<typeof schema>
 // ─── OTP Input ───────────────────────────────────────────────────
 function OtpInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const refs = useRef<(HTMLInputElement | null)[]>([])
+
   const handleChange = (i: number, v: string) => {
     const digit = v.replace(/\D/g, "").slice(-1)
-    const arr = (value + "      ").split("").slice(0, 6)
-    arr[i] = digit
+    const arr   = (value + "      ").split("").slice(0, 6)
+    arr[i]      = digit
     onChange(arr.join("").trimEnd())
     if (digit && i < 5) refs.current[i + 1]?.focus()
   }
+
   const handleKey = (i: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !value[i] && i > 0) refs.current[i - 1]?.focus()
   }
+
   const handlePaste = (e: React.ClipboardEvent) => {
     const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6)
     if (digits.length === 6) { onChange(digits); refs.current[5]?.focus() }
     e.preventDefault()
   }
+
   return (
     <div className="flex gap-2 justify-center" onPaste={handlePaste}>
       {Array.from({ length: 6 }).map((_, i) => (
@@ -1821,12 +1852,12 @@ function OtpInput({ value, onChange }: { value: string; onChange: (v: string) =>
 // ─── Auth Gate ────────────────────────────────────────────────────
 type AuthStep = "choose" | "email" | "otp"
 function AuthGate({ onSuccess }: { onSuccess: () => void }) {
-  const { setUser } = useAuth()
-  const [step, setStep] = useState<AuthStep>("choose")
-  const [email, setEmail] = useState("")
-  const [otp, setOtp] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [countdown, setCountdown] = useState(0)
+  const { setUser }                   = useAuth()
+  const [step, setStep]               = useState<AuthStep>("choose")
+  const [email, setEmail]             = useState("")
+  const [otp, setOtp]                 = useState("")
+  const [loading, setLoading]         = useState(false)
+  const [countdown, setCountdown]     = useState(0)
 
   useEffect(() => {
     if (countdown <= 0) return
@@ -1873,7 +1904,8 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
         style={{ backdropFilter: "blur(12px)", backgroundColor: "rgba(0,0,0,0.75)" }}
       >
         <div className="w-full max-w-sm bg-card rounded-3xl border border-border shadow-2xl overflow-hidden">
@@ -1892,6 +1924,7 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
               {step === "otp"    && `Code sent to ${email}`}
             </p>
           </div>
+
           <div className="px-6 py-6 flex flex-col gap-4">
             {step === "choose" && (
               <>
@@ -1906,7 +1939,10 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
                   <span className="text-muted-foreground text-xs font-medium">or</span>
                   <div className="flex-1 border-t border-border" />
                 </div>
-                <button onClick={() => setStep("email")} className="w-full flex items-center gap-3 border border-border hover:border-accent/60 bg-background hover:bg-accent/5 rounded-2xl px-4 py-3.5 transition-all group">
+                <button
+                  onClick={() => setStep("email")}
+                  className="w-full flex items-center gap-3 border border-border hover:border-accent/60 bg-background hover:bg-accent/5 rounded-2xl px-4 py-3.5 transition-all group"
+                >
                   <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center shrink-0"><Mail size={16} className="text-accent" /></div>
                   <div className="text-left flex-1">
                     <p className="text-white text-sm font-semibold">Continue with Email</p>
@@ -1919,35 +1955,49 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
                 </p>
               </>
             )}
+
             {step === "email" && (
               <>
-                <Input type="email" inputMode="email" autoComplete="email" autoFocus placeholder="your@email.com"
+                <Input
+                  type="email" inputMode="email" autoComplete="email" autoFocus
+                  placeholder="your@email.com"
                   value={email} onChange={e => setEmail(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSendOtp()}
-                  className="bg-background border-border h-12 text-base" />
-                <Button onClick={handleSendOtp} disabled={loading || !email.includes("@")}
-                  className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-5">
+                  className="bg-background border-border h-12 text-base"
+                />
+                <Button
+                  onClick={handleSendOtp}
+                  disabled={loading || !email.includes("@")}
+                  className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-5"
+                >
                   {loading ? <><Loader2 size={15} className="animate-spin mr-1.5" />Sending code...</> : "Send verification code →"}
                 </Button>
                 <button onClick={() => setStep("choose")} className="text-xs text-muted-foreground hover:text-white text-center transition-colors">← Back to sign in options</button>
               </>
             )}
+
             {step === "otp" && (
               <>
                 <div className="text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-3"><ShieldCheck size={22} className="text-accent" /></div>
+                  <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-3">
+                    <ShieldCheck size={22} className="text-accent" />
+                  </div>
                   <p className="text-muted-foreground text-sm">Enter the 6-digit code sent to<br /><span className="text-white font-semibold">{email}</span></p>
                 </div>
                 <OtpInput value={otp} onChange={setOtp} />
-                <Button onClick={handleVerifyOtp} disabled={loading || otp.replace(/\s/g, "").length !== 6}
-                  className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-5">
+                <Button
+                  onClick={handleVerifyOtp}
+                  disabled={loading || otp.replace(/\s/g, "").length !== 6}
+                  className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-5"
+                >
                   {loading ? <><Loader2 size={15} className="animate-spin mr-1.5" />Verifying...</> : "Verify & Continue →"}
                 </Button>
                 <div className="flex items-center justify-between text-xs">
                   <button onClick={() => { setStep("email"); setOtp("") }} className="text-muted-foreground hover:text-white transition-colors">← Change email</button>
                   {countdown > 0
                     ? <span className="text-muted-foreground">Resend in {countdown}s</span>
-                    : <button onClick={handleSendOtp} className="text-accent hover:underline">Resend code</button>}
+                    : <button onClick={handleSendOtp} className="text-accent hover:underline">Resend code</button>
+                  }
                 </div>
               </>
             )}
@@ -1959,22 +2009,23 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
 }
 
 // ─── Step Indicator ───────────────────────────────────────────────
-const STEPS: { key: MainStep; label: string; icon: React.ReactNode }[] = [
-  { key: "activities", label: "Activities", icon: <ShoppingCart size={13} /> },
-  { key: "datetime",   label: "Date & Time", icon: <Calendar size={13} /> },
-  { key: "guests",     label: "Guests",      icon: <Users size={13} /> },
-  { key: "details",    label: "Payment",     icon: <Wallet size={13} /> },
+const STEPS: { key: MainStep; label: string }[] = [
+  { key: "activities", label: "Activities" },
+  { key: "datetime",   label: "Date & Time" },
+  { key: "guests",     label: "Guests" },
+  { key: "details",    label: "Payment" },
 ]
 
 function StepBar({ current }: { current: MainStep }) {
-  const stepKeys = STEPS.map(s => s.key)
+  const stepKeys   = STEPS.map(s => s.key)
   const currentIdx = stepKeys.indexOf(current)
   if (currentIdx < 0) return null
+
   return (
     <div className="flex items-center gap-0 w-full px-4 py-3 border-b border-border bg-background/95">
       {STEPS.map((s, i) => {
-        const done    = i < currentIdx
-        const active  = i === currentIdx
+        const done   = i < currentIdx
+        const active = i === currentIdx
         return (
           <div key={s.key} className="flex items-center flex-1 min-w-0">
             <div className={`flex items-center gap-1.5 shrink-0 transition-all ${active ? "text-accent" : done ? "text-green-400" : "text-muted-foreground/40"}`}>
@@ -2007,12 +2058,19 @@ const ActivityCard = memo(function ActivityCard({ activity, added, onToggle, pri
         ${added ? "border-accent/50 bg-accent/8 ring-1 ring-accent/20" : "border-border bg-card hover:border-border/80 hover:bg-card/80"}`}
     >
       <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
-        <Image src={activityImage(activity)} alt={activity.name} fill sizes="56px" priority={priority} loading={priority ? "eager" : "lazy"} className="object-cover" />
+        <Image
+          src={activityImage(activity)} alt={activity.name}
+          fill sizes="56px"
+          priority={priority} loading={priority ? "eager" : "lazy"}
+          className="object-cover"
+        />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <p className="text-white font-semibold text-sm truncate">{activity.name}</p>
-          {activity.is_popular && <Badge className="bg-accent/20 text-accent border-0 text-[10px] px-1.5 py-0 h-4 shrink-0">Popular</Badge>}
+          {activity.is_popular && (
+            <Badge className="bg-accent/20 text-accent border-0 text-[10px] px-1.5 py-0 h-4 shrink-0">Popular</Badge>
+          )}
         </div>
         <p className="text-muted-foreground text-xs mt-0.5 truncate">{activity.tagline}</p>
         <div className="flex items-center gap-2 mt-1">
@@ -2029,7 +2087,58 @@ const ActivityCard = memo(function ActivityCard({ activity, added, onToggle, pri
   )
 })
 
-// ─── Guests step ─────────────────────────────────────────────────
+// ─── Counter Button ───────────────────────────────────────────────
+// Standalone component to avoid styling issues with counter numbers
+function CounterButton({ onPress, disabled, children }: {
+  onPress: () => void; disabled: boolean; children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={disabled}
+      style={{
+        width: "36px",
+        height: "36px",
+        borderRadius: "50%",
+        border: "1px solid",
+        borderColor: disabled ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.25)",
+        background: "transparent",
+        color: disabled ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.9)",
+        fontSize: "20px",
+        lineHeight: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: disabled ? "not-allowed" : "pointer",
+        transition: "all 0.15s",
+        flexShrink: 0,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function CounterValue({ value }: { value: number }) {
+  return (
+    <span
+      style={{
+        minWidth: "32px",
+        textAlign: "center",
+        fontSize: "18px",
+        fontWeight: 700,
+        color: "#ffffff",
+        fontVariantNumeric: "tabular-nums",
+        display: "inline-block",
+      }}
+    >
+      {value}
+    </span>
+  )
+}
+
+// ─── Guests Step ──────────────────────────────────────────────────
 function GuestsStep({ items, updateItem, onNext, onBack }: {
   items: CartItem[]
   updateItem: (cartId: string, patch: Partial<CartItem>) => void
@@ -2056,6 +2165,11 @@ function GuestsStep({ items, updateItem, onNext, onBack }: {
             : adultPrice
           const maxPersons = item.activity.max_persons
 
+          const canAddAdult   = item.numAdults + item.numChildren < maxPersons
+          const canRemoveAdult = item.numAdults > item.activity.min_persons
+          const canAddChild   = item.numAdults + item.numChildren < maxPersons
+          const canRemoveChild = item.numChildren > 0
+
           return (
             <div key={item.cartId} className="bg-card border border-border rounded-2xl overflow-hidden">
               {/* Activity header */}
@@ -2065,66 +2179,77 @@ function GuestsStep({ items, updateItem, onNext, onBack }: {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-xs font-semibold truncate">{item.activity.name}</p>
-                  <p className="text-muted-foreground text-[11px]">Min {item.activity.min_persons} · Max {maxPersons}</p>
+                  <p className="text-muted-foreground text-[11px]">
+                    Min {item.activity.min_persons} · Max {maxPersons}
+                  </p>
                 </div>
-                <p className="text-accent font-bold text-sm tabular-nums shrink-0">₹{total.toLocaleString()}</p>
+                <p style={{ color: "var(--color-accent, #16a34a)", fontWeight: 700, fontSize: "15px", fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>
+                  ₹{total.toLocaleString()}
+                </p>
               </div>
 
               {/* Adults row */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 text-accent">
-                    <UserRound size={13} />
+                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                    <UserRound size={13} className="text-accent" />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium leading-none">Adults</p>
-                    <p className="text-muted-foreground text-xs mt-0.5">₹{adultPrice.toLocaleString()} / person</p>
+                    <p style={{ color: "#fff", fontSize: "14px", fontWeight: 500, lineHeight: 1 }}>Adults</p>
+                    <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "11px", marginTop: "3px" }}>
+                      ₹{adultPrice.toLocaleString()} / person
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => updateItem(item.cartId, { numAdults: Math.max(item.activity.min_persons, item.numAdults - 1) })}
-                    disabled={item.numAdults <= item.activity.min_persons}
-                    className="w-8 h-8 rounded-full border border-border text-white flex items-center justify-center text-lg transition-colors hover:border-accent hover:text-accent active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >−</button>
-                  <span className="text-white font-bold w-5 text-center tabular-nums">{item.numAdults}</span>
-                  <button
-                    onClick={() => updateItem(item.cartId, { numAdults: Math.min(maxPersons - item.numChildren, item.numAdults + 1) })}
-                    disabled={item.numAdults + item.numChildren >= maxPersons}
-                    className="w-8 h-8 rounded-full border border-border text-white flex items-center justify-center text-lg transition-colors hover:border-accent hover:text-accent active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >+</button>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <CounterButton
+                    onPress={() => updateItem(item.cartId, { numAdults: item.numAdults - 1 })}
+                    disabled={!canRemoveAdult}
+                  >−</CounterButton>
+                  <CounterValue value={item.numAdults} />
+                  <CounterButton
+                    onPress={() => updateItem(item.cartId, { numAdults: item.numAdults + 1 })}
+                    disabled={!canAddAdult}
+                  >+</CounterButton>
                 </div>
               </div>
 
               {/* Children row */}
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-400">
-                    <Baby size={13} />
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <Baby size={13} className="text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium leading-none">Children</p>
-                    <p className="text-muted-foreground text-xs mt-0.5">
+                    <p style={{ color: "#fff", fontSize: "14px", fontWeight: 500, lineHeight: 1 }}>Children</p>
+                    <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "11px", marginTop: "3px" }}>
                       {childPrice < adultPrice
                         ? `₹${childPrice.toLocaleString()} / child`
                         : "Same price as adults"}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => updateItem(item.cartId, { numChildren: Math.max(0, item.numChildren - 1) })}
-                    disabled={item.numChildren <= 0}
-                    className="w-8 h-8 rounded-full border border-border text-white flex items-center justify-center text-lg transition-colors hover:border-accent hover:text-accent active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >−</button>
-                  <span className="text-white font-bold w-5 text-center tabular-nums">{item.numChildren}</span>
-                  <button
-                    onClick={() => updateItem(item.cartId, { numChildren: item.numAdults + item.numChildren < maxPersons ? item.numChildren + 1 : item.numChildren })}
-                    disabled={item.numAdults + item.numChildren >= maxPersons}
-                    className="w-8 h-8 rounded-full border border-border text-white flex items-center justify-center text-lg transition-colors hover:border-accent hover:text-accent active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >+</button>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <CounterButton
+                    onPress={() => updateItem(item.cartId, { numChildren: item.numChildren - 1 })}
+                    disabled={!canRemoveChild}
+                  >−</CounterButton>
+                  <CounterValue value={item.numChildren} />
+                  <CounterButton
+                    onPress={() => updateItem(item.cartId, { numChildren: item.numChildren + 1 })}
+                    disabled={!canAddChild}
+                  >+</CounterButton>
                 </div>
               </div>
+
+              {/* Validation hint */}
+              {item.numAdults + item.numChildren < item.activity.min_persons && (
+                <div className="px-4 pb-3">
+                  <p style={{ color: "#f87171", fontSize: "11px" }}>
+                    ⚠ Minimum {item.activity.min_persons} guests required
+                  </p>
+                </div>
+              )}
             </div>
           )
         })}
@@ -2140,21 +2265,204 @@ function GuestsStep({ items, updateItem, onNext, onBack }: {
   )
 }
 
+// ─── Scroll Drum Time Picker ──────────────────────────────────────
+// Replaces the free <input type="time"> with a snap-scroll slot picker
+// that is physically constrained to 06:30–17:00
+
+function DrumTimePicker({ value, onChange }: {
+  value: string
+  onChange: (val: string) => void
+}) {
+  const listRef    = useRef<HTMLDivElement>(null)
+  const ITEM_H     = 48
+  const VISIBLE    = 5
+  const PAD        = Math.floor(VISIBLE / 2)
+
+  // Build padded list: PAD empty slots + TIME_SLOTS + PAD empty slots
+  const paddedSlots = [
+    ...Array(PAD).fill(null),
+    ...TIME_SLOTS,
+    ...Array(PAD).fill(null),
+  ]
+
+  const selectedIdx = TIME_SLOTS.findIndex(s => s.value === value)
+
+  const scrollToIndex = useCallback((idx: number, smooth = true) => {
+    if (!listRef.current) return
+    listRef.current.scrollTo({
+      top:      idx * ITEM_H,
+      behavior: smooth ? "smooth" : "instant",
+    })
+  }, [])
+
+  // Scroll to selected on mount / value change
+  useEffect(() => {
+    const idx = selectedIdx >= 0 ? selectedIdx : 0
+    scrollToIndex(idx, false)
+  }, []) // eslint-disable-line
+
+  useEffect(() => {
+    if (selectedIdx >= 0) scrollToIndex(selectedIdx, true)
+  }, [value, selectedIdx, scrollToIndex])
+
+  const handleScroll = useCallback(() => {
+    if (!listRef.current) return
+    const rawIdx  = Math.round(listRef.current.scrollTop / ITEM_H)
+    const clamped = Math.max(0, Math.min(rawIdx, TIME_SLOTS.length - 1))
+    const slot    = TIME_SLOTS[clamped]
+    if (slot && slot.value !== value) onChange(slot.value)
+  }, [value, onChange])
+
+  // Snap on scroll end
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return
+    let timer: ReturnType<typeof setTimeout>
+    const onScroll = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        handleScroll()
+        // Re-snap
+        const rawIdx  = Math.round(el.scrollTop / ITEM_H)
+        const clamped = Math.max(0, Math.min(rawIdx, TIME_SLOTS.length - 1))
+        el.scrollTo({ top: clamped * ITEM_H, behavior: "smooth" })
+      }, 80)
+    }
+    el.addEventListener("scroll", onScroll, { passive: true })
+    return () => { el.removeEventListener("scroll", onScroll); clearTimeout(timer) }
+  }, [handleScroll])
+
+  const containerH = ITEM_H * VISIBLE
+
+  return (
+    <div style={{ position: "relative", userSelect: "none" }}>
+      {/* Selection highlight band */}
+      <div
+        style={{
+          position:     "absolute",
+          left:         0,
+          right:        0,
+          top:          `${PAD * ITEM_H}px`,
+          height:       `${ITEM_H}px`,
+          background:   "rgba(22,163,74,0.12)",
+          border:       "1px solid rgba(22,163,74,0.3)",
+          borderRadius: "12px",
+          pointerEvents:"none",
+          zIndex:        2,
+        }}
+      />
+      {/* Top fade */}
+      <div
+        style={{
+          position:   "absolute",
+          top:         0,
+          left:        0,
+          right:       0,
+          height:     `${ITEM_H * PAD}px`,
+          background: "linear-gradient(to bottom, var(--background, #0a0a0a) 0%, transparent 100%)",
+          pointerEvents: "none",
+          zIndex:      3,
+        }}
+      />
+      {/* Bottom fade */}
+      <div
+        style={{
+          position:   "absolute",
+          bottom:      0,
+          left:        0,
+          right:       0,
+          height:     `${ITEM_H * PAD}px`,
+          background: "linear-gradient(to top, var(--background, #0a0a0a) 0%, transparent 100%)",
+          pointerEvents: "none",
+          zIndex:      3,
+        }}
+      />
+      {/* Scroll container */}
+      <div
+        ref={listRef}
+        style={{
+          height:           `${containerH}px`,
+          overflowY:        "scroll",
+          scrollbarWidth:   "none",
+          msOverflowStyle:  "none",
+          scrollSnapType:   "y mandatory",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {paddedSlots.map((slot, i) => {
+          const isSelected = slot && slot.value === value
+          const isAM       = slot && slot.hour < 12
+          return (
+            <div
+              key={i}
+              onClick={() => slot && onChange(slot.value)}
+              style={{
+                height:        `${ITEM_H}px`,
+                display:       "flex",
+                alignItems:    "center",
+                justifyContent:"center",
+                scrollSnapAlign:"center",
+                cursor:         slot ? "pointer" : "default",
+                transition:    "all 0.15s",
+              }}
+            >
+              {slot && (
+                <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize:   isSelected ? "22px" : "17px",
+                      fontWeight: isSelected ? 700 : 400,
+                      color:      isSelected
+                        ? "#ffffff"
+                        : "rgba(255,255,255,0.3)",
+                      fontVariantNumeric: "tabular-nums",
+                      transition: "all 0.2s",
+                      letterSpacing: "-0.5px",
+                    }}
+                  >
+                    {slot.label.replace(/ (AM|PM)$/, "")}
+                  </span>
+                  <span
+                    style={{
+                      fontSize:   isSelected ? "13px" : "11px",
+                      fontWeight: isSelected ? 600 : 400,
+                      color:      isSelected
+                        ? isAM ? "#34d399" : "#f59e0b"
+                        : "rgba(255,255,255,0.2)",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    {isAM ? "AM" : "PM"}
+                  </span>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      {/* Hide scrollbar for webkit */}
+      <style>{`
+        div::-webkit-scrollbar { display: none; }
+      `}</style>
+    </div>
+  )
+}
+
 // ─── DateTime Step ────────────────────────────────────────────────
 function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNext, onBack, adminTimeSlots }: {
-  visitDate: string
-  arrivalTime: string
-  onDateChange: (date: string) => void
-  onTimeChange: (time: string) => void
-  onNext: () => void
-  onBack: () => void
+  visitDate:      string
+  arrivalTime:    string
+  onDateChange:   (date: string) => void
+  onTimeChange:   (time: string) => void
+  onNext:         () => void
+  onBack:         () => void
   adminTimeSlots: string[]
 }) {
-  const [calDate, setCalDate] = useState<Date | undefined>(
+  const [calDate, setCalDate]     = useState<Date | undefined>(
     visitDate ? new Date(visitDate + "T00:00:00") : undefined
   )
-  const [checking, setChecking] = useState(false)
-  const [dateOk, setDateOk] = useState(!!visitDate)
+  const [checking, setChecking]   = useState(false)
+  const [dateOk, setDateOk]       = useState(!!visitDate)
   const [activeTab, setActiveTab] = useState<"date" | "time">(visitDate ? "time" : "date")
 
   const handleDateSelect = async (date: Date | undefined) => {
@@ -2164,7 +2472,7 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
     setDateOk(false)
     try {
       const dateStr = format(date, "yyyy-MM-dd")
-      const data = await (api.activities as any).checkDate?.(dateStr).catch(() => ({ blocked: false }))
+      const data    = await (api.activities as any).checkDate?.(dateStr).catch(() => ({ blocked: false }))
       if (data?.blocked) {
         toast.error("This date is not available. Please pick another.")
         setChecking(false)
@@ -2183,31 +2491,15 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
     }
   }
 
-  // ── Validated time change — enforces 06:30–17:00 ─────────────
-  const handleTimeChange = (val: string) => {
-    if (!val) { onTimeChange(""); return }
-    if (val < OPEN_TIME) {
-      toast.error("Too early! We open at 6:30 AM")
-      onTimeChange(OPEN_TIME)
-      return
-    }
-    if (val > CLOSE_TIME) {
-      toast.error("Last entry is at 5:00 PM")
-      onTimeChange(CLOSE_TIME)
-      return
-    }
-    onTimeChange(val)
-  }
-
-  // Progress bar percentage within operating hours
-  const timeProgress = arrivalTime && isTimeInRange(arrivalTime)
-    ? Math.min(100, Math.max(0,
-        ((toMins(arrivalTime) - toMins(OPEN_TIME)) /
-         (toMins(CLOSE_TIME) - toMins(OPEN_TIME))) * 100
-      ))
-    : null
-
   const canProceed = visitDate && arrivalTime && isTimeInRange(arrivalTime)
+
+  // Formatted display of selected time
+  const timeDisplay = arrivalTime
+    ? (() => {
+        const slot = TIME_SLOTS.find(s => s.value === arrivalTime)
+        return slot ? slot.label : arrivalTime
+      })()
+    : null
 
   return (
     <div className="flex flex-col gap-4">
@@ -2229,7 +2521,7 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
           >
             {tab === "date"
               ? <><Calendar size={13} /> {visitDate ? format(new Date(visitDate + "T00:00:00"), "MMM d") : "Pick Date"}</>
-              : <><Clock size={13} /> {arrivalTime ? format(new Date(`2000-01-01T${arrivalTime}`), "h:mm a") : "Arrival Time"}</>
+              : <><Clock size={13} /> {timeDisplay ?? "Arrival Time"}</>
             }
           </button>
         ))}
@@ -2239,7 +2531,9 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
       {activeTab === "date" && (
         <div className="flex flex-col items-center">
           {checking
-            ? <div className="flex items-center gap-2 py-10 text-muted-foreground text-sm"><Loader2 size={16} className="animate-spin text-accent" />Checking availability...</div>
+            ? <div className="flex items-center gap-2 py-10 text-muted-foreground text-sm">
+                <Loader2 size={16} className="animate-spin text-accent" />Checking availability...
+              </div>
             : <DayPicker
                 mode="single" selected={calDate} onSelect={handleDateSelect}
                 disabled={{ before: new Date() }}
@@ -2251,9 +2545,9 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
 
       {/* Time picker panel */}
       {activeTab === "time" && (
-        <div className="flex flex-col gap-3 px-1">
+        <div className="flex flex-col gap-3">
           {adminTimeSlots.length > 0 ? (
-            // Admin-defined preset slots — always valid, no range check needed
+            // Admin-defined preset slots
             <div className="grid grid-cols-3 gap-2">
               {adminTimeSlots.map(t => (
                 <button
@@ -2269,66 +2563,66 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
               ))}
             </div>
           ) : (
-            // Free time input with enforced operating hours
+            // Scroll-drum time picker — constrained to 06:30–17:00
             <div className="flex flex-col gap-2">
-              {/* Header row: label + hours badge */}
-              <div className="flex items-center justify-between px-1">
-                <p className="text-muted-foreground text-xs">Choose your arrival time</p>
-                <span className="text-[11px] font-medium bg-accent/10 text-accent border border-accent/20 rounded-full px-2 py-0.5">
+              {/* Header */}
+              <div className="flex items-center justify-between px-1 mb-1">
+                <p className="text-muted-foreground text-xs">Scroll to select arrival time</p>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    background: "rgba(22,163,74,0.1)",
+                    color: "#16a34a",
+                    border: "1px solid rgba(22,163,74,0.2)",
+                    borderRadius: "999px",
+                    padding: "2px 10px",
+                  }}
+                >
                   6:30 AM – 5:00 PM
                 </span>
               </div>
 
-              {/* Time input — min/max provide browser UI hints; JS enforces strictly */}
-              <input
-                type="time"
-                value={arrivalTime}
-                min={OPEN_TIME}
-                max={CLOSE_TIME}
-                step={300}
-                onChange={e => handleTimeChange(e.target.value)}
-                onBlur={e => {
-                  // Extra safety on blur — catches cases where browser allows out-of-range
-                  if (e.target.value) handleTimeChange(e.target.value)
+              {/* Drum picker container */}
+              <div
+                style={{
+                  background:   "rgba(255,255,255,0.03)",
+                  border:       "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "16px",
+                  overflow:     "hidden",
+                  padding:      "0 16px",
                 }}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-accent/60 transition-colors"
-              />
-
-              {/* Live feedback */}
-              {arrivalTime && isTimeInRange(arrivalTime) && (
-                <p className="text-accent text-sm font-semibold px-1 flex items-center gap-1.5">
-                  <Check size={13} />
-                  Arriving at {format(new Date(`2000-01-01T${arrivalTime}`), "h:mm a")}
-                </p>
-              )}
-
-              {/* Out-of-range warning */}
-              {arrivalTime && !isTimeInRange(arrivalTime) && (
-                <p className="text-red-400 text-xs px-1 flex items-center gap-1.5">
-                  ⚠ Please select a time between 6:30 AM and 5:00 PM
-                </p>
-              )}
-
-              {/* Visual operating hours progress bar */}
-              <div className="px-1 mt-0.5">
-                <div className="relative h-1.5 bg-border rounded-full overflow-hidden">
-                  {timeProgress !== null && (
-                    <div
-                      className="absolute left-0 top-0 h-full bg-accent rounded-full transition-all duration-300"
-                      style={{ width: `${timeProgress}%` }}
-                    />
-                  )}
-                </div>
-                <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-                  <span>6:30 AM</span>
-                  <span className="text-muted-foreground/50">Operating hours</span>
-                  <span>5:00 PM</span>
-                </div>
+              >
+                <DrumTimePicker value={arrivalTime} onChange={onTimeChange} />
               </div>
+
+              {/* Selected time confirmation */}
+              {arrivalTime && isTimeInRange(arrivalTime) && (
+                <div
+                  style={{
+                    display:      "flex",
+                    alignItems:   "center",
+                    gap:          "8px",
+                    padding:      "10px 14px",
+                    background:   "rgba(22,163,74,0.08)",
+                    border:       "1px solid rgba(22,163,74,0.2)",
+                    borderRadius: "12px",
+                    marginTop:    "4px",
+                  }}
+                >
+                  <Check size={14} style={{ color: "#16a34a", flexShrink: 0 }} />
+                  <span style={{ color: "#fff", fontSize: "14px", fontWeight: 500 }}>
+                    Arriving at {timeDisplay}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
-          <button onClick={() => setActiveTab("date")} className="text-xs text-muted-foreground hover:text-accent py-1 text-center transition-colors">
+          <button
+            onClick={() => setActiveTab("date")}
+            className="text-xs text-muted-foreground hover:text-accent py-1 text-center transition-colors"
+          >
             ← Change date
           </button>
         </div>
@@ -2344,13 +2638,17 @@ function DateTimeStep({ visitDate, arrivalTime, onDateChange, onTimeChange, onNe
   )
 }
 
-// ─── Order Summary card ───────────────────────────────────────────
+// ─── Order Summary ────────────────────────────────────────────────
 function OrderSummary({ items, visitDate, arrivalTime, totalAmount, compact = false }: {
   items: CartItem[]; visitDate: string; arrivalTime: string; totalAmount: number; compact?: boolean
 }) {
   const [expanded, setExpanded] = useState(!compact)
-  const payNow = Math.ceil(totalAmount / 2)
+  const payNow    = Math.ceil(totalAmount / 2)
   const payArrival = totalAmount - payNow
+
+  const timeDisplay = arrivalTime
+    ? TIME_SLOTS.find(s => s.value === arrivalTime)?.label ?? arrivalTime
+    : null
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
@@ -2364,7 +2662,7 @@ function OrderSummary({ items, visitDate, arrivalTime, totalAmount, compact = fa
           {visitDate && (
             <span className="text-muted-foreground text-xs hidden sm:inline">
               · {format(new Date(visitDate + "T00:00:00"), "MMM d")}
-              {arrivalTime && ` · ${format(new Date(`2000-01-01T${arrivalTime}`), "h:mm a")}`}
+              {timeDisplay && ` · ${timeDisplay}`}
             </span>
           )}
         </div>
@@ -2379,7 +2677,7 @@ function OrderSummary({ items, visitDate, arrivalTime, totalAmount, compact = fa
           {items.map(item => {
             const adultP = parseFloat(item.activity.base_price)
             const childP = item.activity.child_price != null ? parseFloat(String(item.activity.child_price)) : adultP
-            const p = item.activity.pricing_type === "per_person"
+            const p      = item.activity.pricing_type === "per_person"
               ? adultP * item.numAdults + childP * item.numChildren
               : adultP
             return (
@@ -2418,13 +2716,13 @@ function OrderSummary({ items, visitDate, arrivalTime, totalAmount, compact = fa
   )
 }
 
-// ─── Details / Payment step ───────────────────────────────────────
+// ─── Details / Payment Step ───────────────────────────────────────
 function DetailsStep({ register, errors, handleSubmit, onSubmit, submitting, totalAmount, items, visitDate, arrivalTime, onBack }: {
   register: any; errors: any; handleSubmit: any; onSubmit: any
   submitting: boolean; totalAmount: number
   items: CartItem[]; visitDate: string; arrivalTime: string; onBack: () => void
 }) {
-  const payNow = Math.ceil(totalAmount / 2)
+  const payNow    = Math.ceil(totalAmount / 2)
   const payArrival = totalAmount - payNow
 
   return (
@@ -2434,22 +2732,27 @@ function DetailsStep({ register, errors, handleSubmit, onSubmit, submitting, tot
       <div className="flex flex-col gap-3">
         <p className="text-white text-sm font-bold">Your Details</p>
         {[
-          { name: "customer_name"  as const, label: "Full Name",     placeholder: "e.g. Adarsh Kumar",      type: "text",  mode: "text",    auto: "name"  },
-          { name: "customer_email" as const, label: "Email Address", placeholder: "your@email.com",          type: "email", mode: "email",   auto: "email" },
-          { name: "customer_phone" as const, label: "Phone Number",  placeholder: "10-digit mobile number", type: "tel",   mode: "numeric", auto: "tel"   },
+          { name: "customer_name"  as const, label: "Full Name",     placeholder: "e.g. Adarsh Kumar",       type: "text",  mode: "text",    auto: "name"  },
+          { name: "customer_email" as const, label: "Email Address", placeholder: "your@email.com",           type: "email", mode: "email",   auto: "email" },
+          { name: "customer_phone" as const, label: "Phone Number",  placeholder: "10-digit mobile number",  type: "tel",   mode: "numeric", auto: "tel"   },
         ].map(f => (
           <div key={f.name}>
             <Label className="text-xs text-muted-foreground">{f.label}</Label>
-            <Input {...register(f.name)} type={f.type} placeholder={f.placeholder}
+            <Input
+              {...register(f.name)}
+              type={f.type}
+              placeholder={f.placeholder}
               className="mt-1 bg-background border-border h-11"
-              autoComplete={f.auto} inputMode={f.mode as any}
-              {...(f.name === "customer_phone" ? { maxLength: 10 } : {})} />
+              autoComplete={f.auto}
+              inputMode={f.mode as any}
+              {...(f.name === "customer_phone" ? { maxLength: 10 } : {})}
+            />
             {errors[f.name] && <p className="text-red-400 text-xs mt-1">{errors[f.name].message}</p>}
           </div>
         ))}
       </div>
 
-      {/* Payment split */}
+      {/* Payment split info */}
       <div className="bg-accent/5 border border-accent/20 rounded-xl p-3.5 flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Wallet size={14} className="text-accent" />
@@ -2472,13 +2775,17 @@ function DetailsStep({ register, errors, handleSubmit, onSubmit, submitting, tot
 
       <div className="flex gap-2">
         <Button type="button" variant="ghost" onClick={onBack} className="flex-1 border border-border text-muted-foreground hover:text-white">← Back</Button>
-        <Button type="submit" disabled={submitting}
-          className="flex-1 bg-accent hover:bg-accent/90 text-white font-bold py-5 text-base disabled:opacity-40 active:scale-[0.98] transition-all">
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="flex-1 bg-accent hover:bg-accent/90 text-white font-bold py-5 text-base disabled:opacity-40 active:scale-[0.98] transition-all"
+        >
           {submitting
             ? <><Loader2 size={15} className="animate-spin mr-1.5" />Creating order...</>
             : <>Pay ₹{payNow.toLocaleString()} →</>}
         </Button>
       </div>
+
       <p className="text-xs text-muted-foreground text-center">🔒 Secure checkout via Razorpay · Balance paid at venue</p>
     </form>
   )
@@ -2486,40 +2793,37 @@ function DetailsStep({ register, errors, handleSubmit, onSubmit, submitting, tot
 
 // ─── Main Page ────────────────────────────────────────────────────
 export default function BookingPage() {
-  const router = useRouter()
+  const router                          = useRouter()
   const { items, addItem, removeItem, clearCart, totalAmount, updateItem } = useCart()
   const { activities, loading: loadingActivities } = useActivities()
-  const { ensureReady } = useRazorpayPreload()
+  const { ensureReady }                 = useRazorpayPreload()
   const { user, loading: authLoading, signOut } = useAuth()
 
   const [step,       setStep]       = useState<MainStep>("activities")
   const [submitting, setSubmitting] = useState(false)
   const [bookingRef, setBookingRef] = useState("")
-
-  // Capture paid/balance BEFORE clearCart wipes totalAmount
-  const [paidOnline,  setPaidOnline]  = useState(0)
-  const [balanceDue,  setBalanceDue]  = useState(0)
+  const [paidOnline, setPaidOnline] = useState(0)
+  const [balanceDue, setBalanceDue] = useState(0)
 
   // ONE shared date/time for ALL activities
-  const [visitDate,   setVisitDate]   = useState("")
-  const [arrivalTime, setArrivalTime] = useState("")
-
-  // Admin-defined time slots fetched from API or hardcoded fallback
+  const [visitDate,    setVisitDate]    = useState("")
+  const [arrivalTime,  setArrivalTime]  = useState("")
   const [adminTimeSlots, setAdminTimeSlots] = useState<string[]>([])
 
   // Keep cart items in sync with shared date/time
   useEffect(() => {
     if (visitDate) items.forEach(i => updateItem(i.cartId, { date: visitDate }))
-  }, [visitDate])
+  }, [visitDate]) // eslint-disable-line
 
   useEffect(() => {
     if (arrivalTime) items.forEach(i => updateItem(i.cartId, { arrivalTime }))
-  }, [arrivalTime])
+  }, [arrivalTime]) // eslint-disable-line
 
   const { register, handleSubmit, formState: { errors }, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
+  // Pre-fill form from logged-in user
   useEffect(() => {
     if (user) {
       if (user.name)  setValue("customer_name",  user.name)
@@ -2540,6 +2844,13 @@ export default function BookingPage() {
     }
   }, [items, addItem, removeItem])
 
+  const goBack = () => {
+    if (step === "activities") { router.back(); return }
+    const order: MainStep[] = ["activities", "datetime", "guests", "details"]
+    const idx = order.indexOf(step)
+    if (idx > 0) setStep(order[idx - 1])
+  }
+
   const onSubmit = async (formData: FormData) => {
     setSubmitting(true)
     setStep("processing")
@@ -2556,11 +2867,19 @@ export default function BookingPage() {
           num_children: i.numChildren,
         })),
       })
+
       setBookingRef(booking.booking_reference)
+
       const ready = await ensureReady()
-      if (!ready) { toast.error("Payment gateway unavailable. Try again."); setSubmitting(false); setStep("details"); return }
+      if (!ready) {
+        toast.error("Payment gateway unavailable. Try again.")
+        setSubmitting(false)
+        setStep("details")
+        return
+      }
 
       setSubmitting(false)
+
       new (window as any).Razorpay({
         key:         booking.razorpay_key_id,
         amount:      Math.round(parseFloat(booking.amount_to_pay) * 100),
@@ -2578,7 +2897,6 @@ export default function BookingPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature:  response.razorpay_signature,
             })
-            // Capture BEFORE clearCart wipes totalAmount
             const paid = Math.ceil(totalAmount / 2)
             setPaidOnline(paid)
             setBalanceDue(totalAmount - paid)
@@ -2608,36 +2926,44 @@ export default function BookingPage() {
   )
 
   // ── Success screen ────────────────────────────────────────────
-  if (step === "success") return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-5 px-4 text-center">
-      <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center">
-        <Check size={36} className="text-green-400" />
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold text-white">Booking Confirmed!</h2>
-        <p className="text-muted-foreground text-sm mt-2 max-w-xs mx-auto">Your adventures are booked. A confirmation email has been sent.</p>
-      </div>
-      <div className="bg-card border border-accent/30 rounded-2xl p-6 w-full max-w-xs">
-        <p className="text-xs text-muted-foreground mb-2">Booking Reference</p>
-        <p className="text-2xl font-bold text-accent font-mono tracking-widest">{bookingRef}</p>
-        {visitDate && arrivalTime && (
-          <p className="text-xs text-muted-foreground mt-3">
-            📅 {format(new Date(visitDate + "T00:00:00"), "EEEE, MMMM d yyyy")} · Arrival {format(new Date(`2000-01-01T${arrivalTime}`), "h:mm a")}
+  if (step === "success") {
+    const timeDisplay = arrivalTime
+      ? TIME_SLOTS.find(s => s.value === arrivalTime)?.label ?? arrivalTime
+      : null
+
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-5 px-4 text-center">
+        <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center">
+          <Check size={36} className="text-green-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-white">Booking Confirmed!</h2>
+          <p className="text-muted-foreground text-sm mt-2 max-w-xs mx-auto">Your adventures are booked. A confirmation email has been sent.</p>
+        </div>
+        <div className="bg-card border border-accent/30 rounded-2xl p-6 w-full max-w-xs">
+          <p className="text-xs text-muted-foreground mb-2">Booking Reference</p>
+          <p className="text-2xl font-bold text-accent font-mono tracking-widest">{bookingRef}</p>
+          {visitDate && timeDisplay && (
+            <p className="text-xs text-muted-foreground mt-3">
+              📅 {format(new Date(visitDate + "T00:00:00"), "EEEE, MMMM d yyyy")} · Arrival {timeDisplay}
+            </p>
+          )}
+        </div>
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 w-full max-w-xs text-left">
+          <p className="text-yellow-400 text-xs font-semibold flex items-center gap-1.5 mb-1">
+            <Wallet size={13} /> Balance Due at Arrival
           </p>
-        )}
+          <p className="text-muted-foreground text-xs">
+            Please carry <span className="text-white font-semibold">₹{balanceDue.toLocaleString()}</span> to pay at the venue.
+            You've paid <span className="text-white font-semibold">₹{paidOnline.toLocaleString()}</span> online.
+          </p>
+        </div>
+        <Button onClick={() => router.push("/")} className="bg-accent hover:bg-accent/90 px-8 py-5 font-bold w-full max-w-xs">
+          Back to Home
+        </Button>
       </div>
-      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 w-full max-w-xs text-left">
-        <p className="text-yellow-400 text-xs font-semibold flex items-center gap-1.5 mb-1">
-          <Wallet size={13} /> Balance Due at Arrival
-        </p>
-        <p className="text-muted-foreground text-xs">
-          Please carry <span className="text-white font-semibold">₹{balanceDue.toLocaleString()}</span> to pay at the venue.
-          You've paid <span className="text-white font-semibold">₹{paidOnline.toLocaleString()}</span> online.
-        </p>
-      </div>
-      <Button onClick={() => router.push("/")} className="bg-accent hover:bg-accent/90 px-8 py-5 font-bold w-full max-w-xs">Back to Home</Button>
-    </div>
-  )
+    )
+  }
 
   const showAuthGate = !authLoading && !user
 
@@ -2648,12 +2974,10 @@ export default function BookingPage() {
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3 max-w-2xl mx-auto">
-          <button onClick={() => step === "activities" ? router.back() : setStep(prev => {
-            const order: MainStep[] = ["activities", "datetime", "guests", "details"]
-            const idx = order.indexOf(prev)
-            return idx > 0 ? order[idx - 1] : "activities"
-          })}
-            className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-white hover:bg-border transition-colors shrink-0">
+          <button
+            onClick={goBack}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-white hover:bg-border transition-colors shrink-0"
+          >
             <ArrowLeft size={18} />
           </button>
           <div className="flex-1 min-w-0">
@@ -2667,11 +2991,12 @@ export default function BookingPage() {
                 : <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center text-white text-[10px] font-bold">{user.name?.[0]?.toUpperCase()}</div>
               }
               <span className="text-accent text-xs font-medium max-w-[80px] truncate hidden sm:inline">{user.name}</span>
-              <button onClick={signOut} title="Sign out" className="text-accent/50 hover:text-accent transition-colors"><LogOut size={11} /></button>
+              <button onClick={signOut} title="Sign out" className="text-accent/50 hover:text-accent transition-colors">
+                <LogOut size={11} />
+              </button>
             </div>
           )}
         </div>
-        {/* Step indicator bar */}
         <StepBar current={step} />
       </div>
 
@@ -2687,11 +3012,19 @@ export default function BookingPage() {
             </div>
             {loadingActivities
               ? <div className="flex justify-center py-16"><Loader2 className="animate-spin text-accent" size={28} /></div>
-              : <div className="flex flex-col gap-2">
+              : (
+                <div className="flex flex-col gap-2">
                   {activities.map((a, i) => (
-                    <ActivityCard key={a.id} activity={a} added={isAdded(a.id)} onToggle={() => handleToggle(a)} priority={i === 0} />
+                    <ActivityCard
+                      key={a.id}
+                      activity={a}
+                      added={isAdded(a.id)}
+                      onToggle={() => handleToggle(a)}
+                      priority={i === 0}
+                    />
                   ))}
                 </div>
+              )
             }
             {items.length > 0 && (
               <div className="sticky bottom-0 left-0 right-0 pt-3 bg-background/95 backdrop-blur-sm">
@@ -2699,8 +3032,13 @@ export default function BookingPage() {
                   onClick={() => setStep("datetime")}
                   className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-5 text-base rounded-2xl flex items-center justify-between px-5 transition-all active:scale-[0.98]"
                 >
-                  <span className="flex items-center gap-2"><ShoppingCart size={16} /> {items.length} activit{items.length !== 1 ? "ies" : "y"} selected</span>
-                  <span className="flex items-center gap-1 opacity-80"><IndianRupee size={13} />{totalAmount.toLocaleString()} · Next →</span>
+                  <span className="flex items-center gap-2">
+                    <ShoppingCart size={16} />
+                    {items.length} activit{items.length !== 1 ? "ies" : "y"} selected
+                  </span>
+                  <span className="flex items-center gap-1 opacity-80">
+                    <IndianRupee size={13} />{totalAmount.toLocaleString()} · Next →
+                  </span>
                 </Button>
               </div>
             )}
