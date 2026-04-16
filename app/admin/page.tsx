@@ -1,23 +1,22 @@
-
 "use client"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import {
   TrendingUp, Users, CalendarCheck, IndianRupee,
   Loader2, RefreshCw, LogOut, LayoutDashboard,
   BookOpen, ChevronRight, ArrowUpRight, ArrowDownRight,
-  Clock, Leaf, Palmtree, Settings, CalendarDays, Menu, X
+  Clock, Leaf, Palmtree, Settings, CalendarDays, Menu, X,
+  AlertCircle,
 } from "lucide-react"
-
+import { addDays, format } from "date-fns"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { adminApi } from "@/lib/admin-api"
+import { adminApi, type DashboardBookingRow, type DashboardStats } from "@/lib/admin-api"
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, Legend
+  ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts"
-import { format } from "date-fns"
 
 // ── Constants ────────────────────────────────────────────────────
 const PIE_COLORS = ["#16a34a", "#22c55e", "#4ade80", "#86efac", "#bbf7d0", "#dcfce7"]
@@ -29,7 +28,6 @@ const STATUS_COLORS: Record<string, string> = {
   completed: "bg-blue-500/15 text-blue-400 border-blue-500/30",
 }
 
-// ── Nav items shared between top nav, drawer, and bottom tabs ────
 const NAV_ITEMS = [
   { label: "Dashboard",  icon: LayoutDashboard, href: "/admin" },
   { label: "Bookings",   icon: BookOpen,        href: "/admin/bookings" },
@@ -37,7 +35,9 @@ const NAV_ITEMS = [
   { label: "Settings",   icon: Settings,        href: "/admin/settings" },
 ]
 
-// ── Mobile Slide-in Drawer ───────────────────────────────────────
+const tomorrow = addDays(new Date(), 1)  // ✅ date-fns, not +86400000
+
+// ── Mobile Drawer ────────────────────────────────────────────────
 function MobileDrawer({
   open, onClose, onNavigate, onLogout, currentPath,
 }: {
@@ -56,13 +56,8 @@ function MobileDrawer({
 
   return (
     <>
-      {/* Backdrop */}
       <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Panel */}
       <div className="fixed top-0 left-0 bottom-0 z-50 w-72 bg-card border-r border-border flex flex-col shadow-2xl">
-
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
@@ -81,7 +76,6 @@ function MobileDrawer({
           </button>
         </div>
 
-        {/* Nav links */}
         <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
           {NAV_ITEMS.map(item => {
             const active = currentPath === item.href
@@ -103,7 +97,6 @@ function MobileDrawer({
           })}
         </nav>
 
-        {/* Logout */}
         <div className="px-3 py-4 border-t border-border shrink-0">
           <button
             onClick={() => { onLogout(); onClose() }}
@@ -118,7 +111,7 @@ function MobileDrawer({
   )
 }
 
-// ── Bottom Tab Bar (mobile only, md:hidden) ──────────────────────
+// ── Bottom Tab Bar ───────────────────────────────────────────────
 function BottomTabBar({ currentPath, onNavigate }: {
   currentPath: string
   onNavigate: (href: string) => void
@@ -135,7 +128,6 @@ function BottomTabBar({ currentPath, onNavigate }: {
               className={`relative flex-1 flex flex-col items-center justify-center gap-1 transition-colors
                 ${active ? "text-accent" : "text-muted-foreground"}`}
             >
-              {/* Active pill indicator */}
               {active && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-accent rounded-b-full" />
               )}
@@ -153,7 +145,11 @@ function BottomTabBar({ currentPath, onNavigate }: {
 
 // ── Stat Card ────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, sub, trend }: {
-  icon: any; label: string; value: string | number; sub?: string; trend?: number
+  icon: React.ElementType
+  label: string
+  value: string | number
+  sub?: string
+  trend?: number
 }) {
   const positive = (trend ?? 0) >= 0
   return (
@@ -196,9 +192,9 @@ function BookingTable({
   emptyTitle = "No bookings",
   emptySubtitle = "Bookings will appear here",
 }: {
-  bookings: any[]
+  bookings: DashboardBookingRow[]   // ✅ typed
   onRowClick: (id: number) => void
-  emptyIcon?: any
+  emptyIcon?: React.ElementType
   emptyTitle?: string
   emptySubtitle?: string
 }) {
@@ -225,16 +221,14 @@ function BookingTable({
           </tr>
         </thead>
         <tbody>
-          {bookings.map((b: any) => (
+          {bookings.map(b => (
             <tr
               key={b.id}
               onClick={() => onRowClick(b.id)}
               className="border-b border-border/40 hover:bg-accent/5 active:bg-accent/10 transition-colors cursor-pointer"
             >
               <td className="px-4 lg:px-6 py-3 lg:py-4">
-                <span className="font-mono text-accent text-xs font-semibold">
-                  {b.reference ?? b.booking_reference ?? "—"}
-                </span>
+                <span className="font-mono text-accent text-xs font-semibold">{b.reference}</span>
               </td>
               <td className="px-4 lg:px-6 py-3 lg:py-4">
                 <p className="text-white font-medium whitespace-nowrap text-xs lg:text-sm">{b.customer_name}</p>
@@ -242,18 +236,18 @@ function BookingTable({
               </td>
               <td className="px-4 lg:px-6 py-3 lg:py-4 max-w-[140px] lg:max-w-[200px]">
                 <p className="text-muted-foreground truncate text-xs">
-                  {Array.isArray(b.activities) ? b.activities.join(", ") : (b.activities || "—")}
+                  {b.activities.length ? b.activities.join(", ") : "—"}
                 </p>
               </td>
               <td className="px-4 lg:px-6 py-3 lg:py-4">
                 <div className="flex items-center gap-1 text-muted-foreground text-xs whitespace-nowrap">
                   <Clock size={10} />
-                  {b.earliest_slot || "—"}
+                  {b.earliest_slot ?? "—"}
                 </div>
               </td>
               <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap">
                 <span className="text-white font-semibold text-xs lg:text-sm">
-                  ₹{parseFloat(b.grand_total || "0").toLocaleString()}
+                  ₹{parseFloat(b.grand_total).toLocaleString()}
                 </span>
               </td>
               <td className="px-4 lg:px-6 py-3 lg:py-4">
@@ -277,41 +271,54 @@ export default function AdminDashboard() {
   const router   = useRouter()
   const pathname = usePathname()
 
-  const [stats,      setStats]      = useState<any>(null)
-  const [revenue,    setRevenue]    = useState<any[]>([])
-  const [breakdown,  setBreakdown]  = useState<any[]>([])
+  const [stats,      setStats]      = useState<DashboardStats | null>(null)
+  const [revenue,    setRevenue]    = useState<{ date: string; revenue: number }[]>([])
+  const [breakdown,  setBreakdown]  = useState<{ activity: string; count: number }[]>([])
   const [loading,    setLoading]    = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [error,      setError]      = useState<string | null>(null)  // ✅ error state
   const [days,       setDays]       = useState(7)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  // ✅ Use ref to avoid stale closure — days change only refetches chart, not full reload
+  const daysRef = useRef(days)
+  useEffect(() => { daysRef.current = days }, [days])
+
   const fetchData = useCallback(async (showRefresh = false) => {
+    setError(null)
     if (showRefresh) setRefreshing(true)
     else setLoading(true)
     try {
       const [s, r, b] = await Promise.all([
         adminApi.dashboard.stats(),
-        adminApi.dashboard.revenueChart(days),
+        adminApi.dashboard.revenueChart(daysRef.current),
         adminApi.dashboard.activityBreakdown(),
       ])
       setStats(s)
       setRevenue(r.data ?? [])
       setBreakdown(b.data ?? [])
-    } catch {
-      // 401 → adminApi redirects to /admin/login automatically
+    } catch (err: any) {
+      // 401 → adminApi auto-redirects to /admin/login
+      if (err?.status !== 401) setError("Failed to load dashboard. Please refresh.")
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [days])
+  }, [])  // ✅ no [days] dep — uses ref instead, so days change doesn't cause full reload
 
+  // Initial load
   useEffect(() => { fetchData() }, [fetchData])
 
-  const currentPath = pathname ?? "/admin"
+  // ✅ Days change only refetches chart (as refresh, not full reload)
+  useEffect(() => {
+    if (!loading) fetchData(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [days])
+
+  const currentPath  = pathname ?? "/admin"
   const todayList    = stats?.today_booking_list    ?? []
   const tomorrowList = stats?.tomorrow_booking_list ?? []
 
-  // ── Full-page loader ──────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
@@ -326,7 +333,6 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Mobile drawer */}
       <MobileDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -335,10 +341,8 @@ export default function AdminDashboard() {
         currentPath={currentPath}
       />
 
-      {/* ── Top header ───────────────────────────────────────── */}
+      {/* ── Header ───────────────────────────────────────────── */}
       <header className="border-b border-border px-4 lg:px-6 py-3 lg:py-4 flex items-center gap-3 sticky top-0 bg-background/95 backdrop-blur-sm z-20">
-
-        {/* Hamburger — mobile only */}
         <button
           onClick={() => setDrawerOpen(true)}
           className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-white hover:bg-white/5 transition-colors shrink-0"
@@ -347,7 +351,6 @@ export default function AdminDashboard() {
           <Menu size={20} />
         </button>
 
-        {/* Logo */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
             <Leaf size={15} className="text-accent" />
@@ -357,7 +360,6 @@ export default function AdminDashboard() {
           </span>
         </div>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 ml-6">
           {NAV_ITEMS.map(item => {
             const active = currentPath === item.href
@@ -374,9 +376,7 @@ export default function AdminDashboard() {
           })}
         </nav>
 
-        {/* Right actions */}
         <div className="ml-auto flex items-center gap-1">
-          {/* Refresh — always visible */}
           <Button
             variant="ghost" size="sm"
             onClick={() => fetchData(true)}
@@ -386,8 +386,6 @@ export default function AdminDashboard() {
           >
             <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
           </Button>
-
-          {/* Logout — desktop only (drawer has it on mobile) */}
           <Button
             variant="ghost" size="sm"
             onClick={() => adminApi.logout()}
@@ -398,17 +396,29 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* ── Main content ─────────────────────────────────────── */}
-      {/* pb-20 clears the fixed bottom tab bar on mobile */}
+      {/* ── Main ─────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-5 lg:py-8 flex flex-col gap-5 lg:gap-8 pb-24 md:pb-8">
 
-        {/* Page title */}
         <div>
           <h1 className="text-xl lg:text-2xl font-bold text-white">Dashboard</h1>
           <p className="text-muted-foreground text-xs lg:text-sm mt-0.5">
             {format(new Date(), "EEEE, MMMM d, yyyy")}
           </p>
         </div>
+
+        {/* ✅ Error banner */}
+        {error && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <AlertCircle size={16} className="shrink-0" />
+            {error}
+            <button
+              onClick={() => fetchData(true)}
+              className="ml-auto text-xs underline underline-offset-2 hover:text-red-300"
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
@@ -464,7 +474,9 @@ export default function AdminDashboard() {
               </div>
             </div>
             {revenue.length === 0 ? (
-              <div className="h-44 flex items-center justify-center text-muted-foreground text-sm">No revenue data yet</div>
+              <div className="h-44 flex items-center justify-center text-muted-foreground text-sm">
+                No revenue data yet
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={190}>
                 <BarChart data={revenue} barSize={days <= 7 ? 22 : days <= 14 ? 14 : 8}>
@@ -489,12 +501,18 @@ export default function AdminDashboard() {
               <p className="text-muted-foreground text-xs mt-0.5">By booking count</p>
             </div>
             {breakdown.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm py-8">No data yet</div>
+              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm py-8">
+                No data yet
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-                  <Pie data={breakdown} cx="50%" cy="40%" innerRadius={44} outerRadius={68} dataKey="count" nameKey="activity" paddingAngle={3}>
-                    {breakdown.map((_: any, i: number) => (
+                  <Pie
+                    data={breakdown} cx="50%" cy="40%"
+                    innerRadius={44} outerRadius={68}
+                    dataKey="count" nameKey="activity" paddingAngle={3}
+                  >
+                    {breakdown.map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
@@ -549,13 +567,13 @@ export default function AdminDashboard() {
               <div>
                 <h2 className="text-white font-bold text-sm lg:text-base">Tomorrow's Bookings</h2>
                 <p className="text-muted-foreground text-xs mt-0.5">
-                  {tomorrowList.length} booking{tomorrowList.length !== 1 ? "s" : ""} · {format(new Date(Date.now() + 86400000), "MMM d, yyyy")}
+                  {tomorrowList.length} booking{tomorrowList.length !== 1 ? "s" : ""} · {format(tomorrow, "MMM d, yyyy")}
                 </p>
               </div>
             </div>
             <Button
               variant="ghost" size="sm"
-              onClick={() => router.push(`/admin/bookings?date=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`)}
+              onClick={() => router.push(`/admin/bookings?date=${format(tomorrow, "yyyy-MM-dd")}`)}
               className="text-accent hover:text-accent/80 gap-1 text-xs shrink-0"
             >
               View All <ChevronRight size={13} />
@@ -572,7 +590,6 @@ export default function AdminDashboard() {
 
       </div>
 
-      {/* ── Bottom Tab Bar — mobile only ──────────────────────── */}
       <BottomTabBar currentPath={currentPath} onNavigate={href => router.push(href)} />
 
     </div>

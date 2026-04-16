@@ -3,16 +3,18 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, Phone, MessageCircle, Instagram,CalendarDays  } from 'lucide-react'
+import { Menu, X, Phone, Instagram, CalendarDays, BookMarked } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
 
 export function HeroSection() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showCallPopup, setShowCallPopup] = useState(false)
   const popupRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()  // ← add this
+  const router = useRouter()
+  const { user } = useAuth()
 
   const phoneNumbers = [
     "9496141619",
@@ -25,9 +27,7 @@ export function HeroSection() {
 
   /* ================= SCROLL EFFECT ================= */
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
+    const handleScroll = () => setIsScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -39,26 +39,14 @@ export function HeroSection() {
         setShowCallPopup(false)
       }
     }
-    if (showCallPopup) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+    if (showCallPopup) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showCallPopup])
 
   /* ================= WHATSAPP ================= */
   const handleWhatsApp = () => {
-    const message = `Hello Mangrove Spot Adventures 🌿
-
-I would like to make a booking.
-
-Please share more details.`
-
-    const encodedMessage = encodeURIComponent(message)
-
-    window.open(
-      `https://wa.me/${whatsappNumber}?text=${encodedMessage}`,
-      "_blank"
-    )
+    const message = `Hello Mangrove Spot Adventures 🌿\n\nI would like to make a booking.\n\nPlease share more details.`
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank')
   }
 
   const navItems = [
@@ -78,19 +66,13 @@ Please share more details.`
       {/* ================= CALL POPUP ================= */}
       {showCallPopup && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div
-            ref={popupRef}
-            className="bg-background w-full max-w-sm rounded-2xl p-6 shadow-xl"
-          >
+          <div ref={popupRef} className="bg-background w-full max-w-sm rounded-2xl p-6 shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">
-                Contact Numbers
-              </h3>
+              <h3 className="text-lg font-semibold text-white">Contact Numbers</h3>
               <button onClick={() => setShowCallPopup(false)}>
                 <X className="text-white" />
               </button>
             </div>
-
             <div className="space-y-3">
               {phoneNumbers.map((number) => (
                 <a
@@ -110,31 +92,22 @@ Please share more details.`
       {/* ================= NAVBAR ================= */}
       <nav
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-background/80 backdrop-blur-md shadow-lg'
-            : 'bg-transparent'
+          isScrolled ? 'bg-background/80 backdrop-blur-md shadow-lg' : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
 
-          {/* ===== LOGO ===== */}
+          {/* LOGO */}
           <Link href="/" className="flex items-center gap-3">
+            <Image src="/logo.png" alt="Mangrove Spot Logo" width={45} height={45} priority />
             <Image
-              src="/logo.png"
+              src="/text.svg"
               alt="Mangrove Spot Logo"
-              width={45}
-              height={45}
+              width={150}
+              height={50}
               priority
+              style={{ width: '150px', height: 'auto' }}
             />
-<Image
-  src="/text.svg"
-  alt="Mangrove Spot Logo"
-  width={150}
-  height={50}
-  priority
-  style={{ width: '150px', height: 'auto' }}
-/>
-
           </Link>
 
           {/* Desktop Menu */}
@@ -148,6 +121,17 @@ Please share more details.`
                 {item.label}
               </button>
             ))}
+
+            {/* My Bookings — desktop, only when logged in */}
+            {user && (
+              <button
+                onClick={() => router.push('/my-bookings')}
+                className="flex items-center gap-1.5 text-accent hover:text-accent/70 transition-colors font-medium text-sm border border-accent/30 hover:border-accent/60 px-3 py-1.5 rounded-full"
+              >
+                <BookMarked size={14} />
+                My Bookings
+              </button>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -166,11 +150,22 @@ Please share more details.`
               <button
                 key={item.href}
                 onClick={() => scrollToSection(item.href)}
-                className="block w-full text-left text-white hover:text-accent"
+                className="block w-full text-left text-white hover:text-accent py-1"
               >
                 {item.label}
               </button>
             ))}
+
+            {/* My Bookings — mobile, only when logged in */}
+            {user && (
+              <button
+                onClick={() => { router.push('/my-bookings'); setMobileMenuOpen(false) }}
+                className="flex items-center gap-2 w-full text-left text-accent hover:text-accent/70 font-semibold py-2 border-t border-border/40 mt-1 pt-3"
+              >
+                <BookMarked size={15} />
+                My Bookings
+              </button>
+            )}
           </div>
         )}
       </nav>
@@ -181,42 +176,33 @@ Please share more details.`
         {/* Background Video */}
         <div className="absolute inset-0">
           <video
-            autoPlay
-            muted
-            loop
-            playsInline
+            autoPlay muted loop playsInline
             className="w-full h-full object-cover"
             poster="/bg1.png"
           >
             <source src="/bg.mp4" type="video/mp4" />
           </video>
-
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/50" />
         </div>
 
         {/* Content */}
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
           <div className="space-y-6 max-w-3xl">
-
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
               Explore the Mangrove Spot Adventures
             </h1>
-
             <p className="text-lg sm:text-xl text-gray-200">
               Kayaking • Country Boat Ride • Stand Up Paddle • Coracle Ride • ATV Ride • High Speed Engine Boat Ride
             </p>
-
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-
-            <Button
-  size="lg"
-  onClick={() => router.push('/booking')}
-  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-full px-8"
->
-  <CalendarDays className="mr-2" size={18} />
-  Book Now
-</Button>
-
+              <Button
+                size="lg"
+                onClick={() => router.push('/booking')}
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-full px-8"
+              >
+                <CalendarDays className="mr-2" size={18} />
+                Book Now
+              </Button>
               <Button
                 size="lg"
                 variant="outline"
@@ -226,13 +212,12 @@ Please share more details.`
                 <Phone className="mr-2" size={18} />
                 Call Now
               </Button>
-
             </div>
           </div>
         </div>
       </section>
 
-      {/* Instagram */}
+      {/* Instagram FAB */}
       <a
         href="https://instagram.com/mangrovespot"
         target="_blank"
