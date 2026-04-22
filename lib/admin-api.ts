@@ -1,8 +1,9 @@
 
+
 // const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 // // ── Token helpers (JWT) ───────────────────────────────────────────
-// function getAccessToken() {
+// function getAccessToken(): string {
 //   if (typeof document === "undefined") return ""
 //   const match = document.cookie.match(/admin_access=([^;]+)/)
 //   return match ? match[1] : ""
@@ -27,19 +28,48 @@
 //   throw error
 // }
 
+// // ── Refresh singleton (prevents parallel refresh storms) ──────────
+// let _refreshPromise: Promise<boolean> | null = null
+
+// async function tryRefresh(): Promise<boolean> {
+//   if (_refreshPromise) return _refreshPromise
+//   _refreshPromise = (async () => {
+//     const match   = document.cookie.match(/admin_refresh=([^;]+)/)
+//     const refresh = match ? match[1] : ""
+//     if (!refresh) return false
+//     try {
+//       const res = await fetch(`${BASE}/api/v1/auth/token/refresh/`, {
+//         method:  "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body:    JSON.stringify({ refresh }),
+//       })
+//       if (!res.ok) return false
+//       const data = await res.json()
+//       setTokens(data.access, refresh)
+//       return true
+//     } catch {
+//       return false
+//     } finally {
+//       _refreshPromise = null
+//     }
+//   })()
+//   return _refreshPromise
+// }
+
 // // ── Core fetch ────────────────────────────────────────────────────
 // async function adminFetch(path: string, options: RequestInit = {}) {
 //   const isFormData = options.body instanceof FormData
 
-//   const makeHeaders = (): Record<string, string> => ({
+//   // token passed explicitly so retry always uses the freshest value
+//   const makeHeaders = (token: string): Record<string, string> => ({
 //     ...(!isFormData && { "Content-Type": "application/json" }),
-//     Authorization: `Bearer ${getAccessToken()}`,
+//     Authorization: `Bearer ${token}`,
 //     ...(options.headers as Record<string, string>),
 //   })
 
 //   const res = await fetch(`${BASE}${path}`, {
 //     ...options,
-//     headers: makeHeaders(),
+//     headers: makeHeaders(getAccessToken()),
 //   })
 
 //   if (res.status === 401) {
@@ -49,9 +79,10 @@
 //       window.location.href = "/admin/login"
 //       return new Promise(() => {})
 //     }
+//     // read token AFTER refresh completes — not from a stale closure
 //     const retry = await fetch(`${BASE}${path}`, {
 //       ...options,
-//       headers: makeHeaders(),
+//       headers: makeHeaders(getAccessToken()),
 //     })
 //     if (!retry.ok) await throwApiError(retry)
 //     if (retry.status === 204) return null
@@ -63,24 +94,28 @@
 //   return res.json()
 // }
 
-// // ── Refresh token ─────────────────────────────────────────────────
-// async function tryRefresh(): Promise<boolean> {
-//   const match   = document.cookie.match(/admin_refresh=([^;]+)/)
-//   const refresh = match ? match[1] : ""
-//   if (!refresh) return false
-//   try {
-//     const res = await fetch(`${BASE}/api/v1/auth/token/refresh/`, {
-//       method:  "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body:    JSON.stringify({ refresh }),
+// // ── Blob fetch (CSV export) ───────────────────────────────────────
+// async function adminFetchBlob(path: string): Promise<Blob> {
+//   const res = await fetch(`${BASE}${path}`, {
+//     headers: { Authorization: `Bearer ${getAccessToken()}` },
+//   })
+
+//   if (res.status === 401) {
+//     const refreshed = await tryRefresh()
+//     if (!refreshed) {
+//       clearTokens()
+//       window.location.href = "/admin/login"
+//       return new Promise(() => {})
+//     }
+//     const retry = await fetch(`${BASE}${path}`, {
+//       headers: { Authorization: `Bearer ${getAccessToken()}` },
 //     })
-//     if (!res.ok) return false
-//     const data = await res.json()
-//     setTokens(data.access, refresh)
-//     return true
-//   } catch {
-//     return false
+//     if (!retry.ok) throw new Error(`Export failed: ${retry.status}`)
+//     return retry.blob()
 //   }
+
+//   if (!res.ok) throw new Error(`Export failed: ${res.status}`)
+//   return res.blob()
 // }
 
 // // ── Shared error parser ───────────────────────────────────────────
@@ -98,91 +133,94 @@
 
 // // ── Types ─────────────────────────────────────────────────────────
 // export interface AdminBooking {
-//   id: number
-//   reference: string
-//   status: "pending" | "confirmed" | "completed" | "cancelled" | "expired"
-//   customer_name: string
+//   id:             number
+//   reference:      string
+//   status:         "pending" | "confirmed" | "completed" | "cancelled" | "expired"
+//   customer_name:  string
 //   customer_email: string
 //   customer_phone: string
-//   grand_total: string
-//   created_at: string
-//   items: AdminBookingItem[]
+//   grand_total:    string
+//   amount_paid:    string
+//   balance_due:    string
+//   payment_mode:   string
+//   created_at:     string
+//   items:          AdminBookingItem[]
 // }
 
 // export interface AdminBookingItem {
-//   id: number
-//   activity: { id: number; name: string }
-//   slot: { id: number; label: string; time: string }
-//   visit_date: string
-//   num_persons: number
-//   price_snapshot: string
+//   id:           number
+//   activity:     { id: number; name: string }
+//   slot:         { id: number; label: string; time: string } | null
+//   arrival_time: string | null
+//   num_adults:   number
+//   num_children: number
 // }
 
 // export interface AdminActivity {
-//   id: number
-//   name: string
-//   tagline: string
-//   category: string
-//   image_url: string
-//   duration: string
-//   base_price: string
-//   child_price: string | null          // ← NEW
-//   pricing_type: "per_person" | "per_group"
+//   id:                  number
+//   name:                string
+//   tagline:             string
+//   category:            string
+//   image_url:           string
+//   duration:            string
+//   base_price:          string
+//   child_price:         string | null
+//   pricing_type:        "per_person" | "per_group"
 //   extra_person_charge: string | null
-//   min_persons: number
-//   max_persons: number
-//   opening_time: string                // ← NEW
-//   closing_time: string                // ← NEW
-//   is_popular: boolean
-//   is_visible: boolean
+//   min_persons:         number
+//   max_persons:         number
+//   opening_time:        string
+//   closing_time:        string
+//   is_popular:          boolean
+//   is_visible:          boolean
 //   requires_prebooking: boolean
-//   display_order: number
-//   description: string
-//   rules_text: string
+//   display_order:       number
+//   description:         string
+//   rules_text:          string
 // }
 
 // export interface AdminSlot {
-//   id: number
-//   label: string
-//   time: string
-//   capacity: number
+//   id:        number
+//   label:     string
+//   time:      string
+//   capacity:  number
 //   is_active: boolean
 // }
 
-// export interface AdminRule {                // ← NEW
-//   id: number
-//   rule: string
+// export interface AdminRule {
+//   id:    number
+//   rule:  string
 //   order: number
 // }
 
 // export interface DailyReport {
-//   date: string
+//   date:           string
 //   total_bookings: number
-//   total_revenue: number
+//   total_revenue:  number
 //   by_activity: Array<{
 //     activity__name: string
-//     total_revenue: number
-//     booking_count: number
-//     total_persons: number
+//     total_revenue:  number
+//     booking_count:  number
+//     total_persons:  number
 //   }>
 // }
 
 // export interface WeeklyReport {
 //   days: Array<{
-//     date: string
-//     revenue: number
+//     date:     string
+//     revenue:  number
 //     bookings: number
 //   }>
 // }
 
 // export interface DashboardStats {
-//   today_revenue:   number
-//   today_bookings:  number
-//   revenue_trend:   number
-//   booking_trend:   number
-//   month_revenue:   number
-//   month_bookings:  number
-//   total_customers: number
+//   today_revenue:         number
+//   today_bookings:        number
+//   revenue_trend:         number
+//   booking_trend:         number
+//   month_revenue:         number
+//   month_bookings:        number
+//   total_customers:       number
 //   today_booking_list:    DashboardBookingRow[]
 //   tomorrow_booking_list: DashboardBookingRow[]
 // }
@@ -208,9 +246,9 @@
 // }
 
 // export interface BlockedDate {
-//   id: number
-//   date: string
-//   reason: string
+//   id:       number
+//   date:     string
+//   reason:   string
 //   activity: number | null
 // }
 
@@ -256,13 +294,7 @@
 //       adminFetch("/api/v1/admin/reports/weekly/"),
 
 //     exportCsv: (from: string, to: string): Promise<Blob> =>
-//       fetch(
-//         `${BASE}/api/v1/admin/reports/export/?from=${from}&to=${to}`,
-//         { headers: { Authorization: `Bearer ${getAccessToken()}` } }
-//       ).then(res => {
-//         if (!res.ok) throw new Error(`Export failed: ${res.status}`)
-//         return res.blob()
-//       }),
+//       adminFetchBlob(`/api/v1/admin/reports/export/?from=${from}&to=${to}`),
 //   },
 
 //   // ── Bookings ──────────────────────────────────────────────────
@@ -322,7 +354,7 @@
 //       })
 //     },
 
-//     // ── Slots ──────────────────────────────────────────────────
+//     // ── Slots ────────────────────────────────────────────────
 //     slots: {
 //       list: (activityId: string | number): Promise<AdminSlot[]> =>
 //         adminFetch(`/api/v1/admin/activities/${activityId}/slots/`),
@@ -343,7 +375,7 @@
 //         adminFetch(`/api/v1/admin/slots/${slotId}/`, { method: "DELETE" }),
 //     },
 
-//     // ── Rules ──────────────────────────────────────────────────
+//     // ── Rules ────────────────────────────────────────────────
 //     rules: {
 //       list: (activityId: string | number): Promise<AdminRule[]> =>
 //         adminFetch(`/api/v1/admin/activities/${activityId}/rules/`),
@@ -354,14 +386,14 @@
 //           body:   JSON.stringify(data),
 //         }),
 
-//       update: (ruleId: string | number, data: { rule: string; order: number }): Promise<AdminRule> =>
-//         adminFetch(`/api/v1/admin/activities/${ruleId}/rules/${ruleId}/`, {
+//       update: (activityId: string | number, ruleId: string | number, data: { rule: string; order: number }): Promise<AdminRule> =>
+//         adminFetch(`/api/v1/admin/activities/${activityId}/rules/${ruleId}/`, {
 //           method: "PATCH",
 //           body:   JSON.stringify(data),
 //         }),
 
-//       delete: (ruleId: string | number): Promise<null> =>
-//         adminFetch(`/api/v1/admin/activities/${ruleId}/rules/${ruleId}/`, {
+//       delete: (activityId: string | number, ruleId: string | number): Promise<null> =>
+//         adminFetch(`/api/v1/admin/activities/${activityId}/rules/${ruleId}/`, {
 //           method: "DELETE",
 //         }),
 //     },
@@ -389,9 +421,255 @@
 // }
 
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+// ── Token helper ──────────────────────────────────────────────────
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem('ms_customer')
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed?.token ?? parsed?.key ?? null
+  } catch { return null }
+}
+
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken()
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
+    ...options,
+  })
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    const err: any = new Error(`HTTP ${res.status}`)
+    err.status = res.status
+    err.data   = error
+    throw err
+  }
+  return res.json()
+}
+
+// ── Types ─────────────────────────────────────────────────────────
+
+export interface TimeSlot {
+  id: number; label: string; time: string
+  capacity: number; available: number; is_full: boolean
+}
+
+export interface ActivityRule {
+  id: number
+  rule: string
+  order: number
+}
+
+export interface Activity {
+  id: number
+  name: string
+  tagline: string
+  category: string
+  image_url: string
+  duration: string
+  base_price: string
+  child_price: string | null
+  extra_person_charge: string | null
+  pricing_type: 'per_person' | 'per_group'
+  min_persons: number
+  max_persons: number
+  opening_time: string
+  closing_time: string
+  is_popular: boolean
+  requires_prebooking: boolean
+  display_order: number
+  // ── Age restriction ──────────────────────────────────────────
+  min_age: number | null          // e.g. 7 → "children under 7 not allowed"
+  children_allowed: boolean       // false when min_age is set — use to show/hide children counter
+}
+
+export interface ActivityDetail extends Activity {
+  description: string
+  slots: TimeSlot[]
+  rules: ActivityRule[]
+}
+
+export interface AvailabilityResponse {
+  date: string; blocked: boolean; has_slots: boolean; slots: TimeSlot[]
+}
+
+export interface BookingItem {
+  activity_id:  number
+  visit_date:   string
+  arrival_time: string
+  num_adults:   number
+  num_children: number
+  slot_id?:     number | null
+}
+
+export interface BookingPayload {
+  customer_name:     string
+  customer_email:    string
+  customer_phone:    string
+  special_requests?: string
+  items:             BookingItem[]
+}
+
+export interface BookingInitiateResponse {
+  booking_reference: string
+  razorpay_order_id: string
+  razorpay_key_id:   string
+  grand_total:       string
+  amount_to_pay:     string
+  balance_due:       string
+  payment_mode:      string
+  customer_name:     string
+  customer_email:    string
+  customer_phone:    string
+}
+
+export interface PaymentVerifyPayload {
+  razorpay_order_id:   string
+  razorpay_payment_id: string
+  razorpay_signature:  string
+}
+
+export interface BookingLookupResponse {
+  reference:      string
+  status:         string
+  customer_name:  string
+  customer_email: string
+  customer_phone: string
+  grand_total:    string
+  amount_paid:    string
+  balance_due:    string
+  payment_mode:   string
+  items: Array<{
+    activity_name:  string
+    activity_image: string
+    slot_label:     string | null
+    arrival_time:   string | null
+    visit_date:     string
+    num_adults:     number
+    num_children:   number
+    price_snapshot: string
+  }>
+}
+
+export interface MyBookingItem {
+  activity_name:  string
+  activity_image: string
+  slot_label:     string | null
+  arrival_time:   string | null
+  visit_date:     string
+  num_adults:     number
+  num_children:   number
+  price_snapshot: string
+}
+
+export interface MyBooking {
+  reference:      string
+  status:         string
+  created_at:     string
+  visit_date:     string | null
+  arrival_time:   string | null
+  grand_total:    string
+  amount_paid:    string
+  balance_due:    string
+  payment_mode:   string
+  customer_name:  string
+  customer_email: string
+  customer_phone: string
+  items:          MyBookingItem[]
+}
+
+// ── AuthResponse — custom HMAC JWT issued by make_customer_token() ──
+export interface AuthResponse {
+  token:  string
+  name:   string
+  email:  string
+  avatar: string
+}
+
+export const api = {
+  activities: {
+    list: () =>
+      apiFetch<Activity[]>('/api/v1/activities/'),
+
+    detail: (id: number) =>
+      apiFetch<ActivityDetail>(`/api/v1/activities/${id}/`),
+
+    availability: (id: number, date: string) =>
+      apiFetch<AvailabilityResponse>(`/api/v1/activities/${id}/availability/?date=${date}`),
+
+    checkDate: (date: string) =>
+      apiFetch<{ blocked: boolean }>(`/api/v1/activities/check-date/?date=${date}`),
+  },
+
+  bookings: {
+    initiate: (data: BookingPayload) =>
+      apiFetch<BookingInitiateResponse>('/api/v1/bookings/initiate/', {
+        method: 'POST', body: JSON.stringify(data),
+      }),
+
+    lookup: (email: string, reference: string) =>
+      apiFetch<BookingLookupResponse>(
+        `/api/v1/bookings/lookup/?email=${encodeURIComponent(email)}&reference=${encodeURIComponent(reference)}`
+      ),
+
+    myBookings: () =>
+      apiFetch<MyBooking[]>('/api/v1/bookings/my-bookings/'),
+
+    receiptUrl: (reference: string): string =>
+      `${BASE_URL}/api/v1/bookings/${reference}/receipt/`,
+  },
+
+  payments: {
+    verify: (data: PaymentVerifyPayload) =>
+      apiFetch<{ status: string; booking_reference: string; message: string }>(
+        '/api/v1/payments/verify/',
+        { method: 'POST', body: JSON.stringify(data) }
+      ),
+  },
+
+  auth: {
+    sendOtp: (email: string) =>
+      apiFetch<{ message: string }>('/api/v1/auth/otp/send/', {
+        method: 'POST', body: JSON.stringify({ email }),
+      }),
+
+    verifyOtp: (email: string, code: string) =>
+      apiFetch<AuthResponse>('/api/v1/auth/otp/verify/', {
+        method: 'POST', body: JSON.stringify({ email, code }),
+      }),
+
+    google: (credential: string) =>
+      apiFetch<AuthResponse>('/api/v1/auth/google/', {
+        method: 'POST', body: JSON.stringify({ credential }),
+      }),
+  },
+}
+
+export function parseApiError(err: any): string {
+  const data = err?.data
+  if (!data || typeof data !== 'object') return err?.message || 'Something went wrong'
+  return Object.entries(data)
+    .map(([field, errors]) => {
+      const label = field === 'non_field_errors' || field === 'detail' ? '' : `${field}: `
+      const msg   = Array.isArray(errors) ? errors.join(', ') : String(errors)
+      return `${label}${msg}`
+    })
+    .join('\n')
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ADMIN API
+// ═══════════════════════════════════════════════════════════════════
+
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
-// ── Token helpers (JWT) ───────────────────────────────────────────
 function getAccessToken(): string {
   if (typeof document === "undefined") return ""
   const match = document.cookie.match(/admin_access=([^;]+)/)
@@ -408,7 +686,6 @@ function clearTokens() {
   document.cookie = "admin_refresh=; max-age=0; path=/"
 }
 
-// ── Error helper ──────────────────────────────────────────────────
 async function throwApiError(res: Response): Promise<never> {
   const body = await res.json().catch(() => ({}))
   const error: any = new Error(`HTTP ${res.status}`)
@@ -417,7 +694,6 @@ async function throwApiError(res: Response): Promise<never> {
   throw error
 }
 
-// ── Refresh singleton (prevents parallel refresh storms) ──────────
 let _refreshPromise: Promise<boolean> | null = null
 
 async function tryRefresh(): Promise<boolean> {
@@ -445,11 +721,9 @@ async function tryRefresh(): Promise<boolean> {
   return _refreshPromise
 }
 
-// ── Core fetch ────────────────────────────────────────────────────
 async function adminFetch(path: string, options: RequestInit = {}) {
   const isFormData = options.body instanceof FormData
 
-  // token passed explicitly so retry always uses the freshest value
   const makeHeaders = (token: string): Record<string, string> => ({
     ...(!isFormData && { "Content-Type": "application/json" }),
     Authorization: `Bearer ${token}`,
@@ -468,7 +742,6 @@ async function adminFetch(path: string, options: RequestInit = {}) {
       window.location.href = "/admin/login"
       return new Promise(() => {})
     }
-    // read token AFTER refresh completes — not from a stale closure
     const retry = await fetch(`${BASE}${path}`, {
       ...options,
       headers: makeHeaders(getAccessToken()),
@@ -483,7 +756,6 @@ async function adminFetch(path: string, options: RequestInit = {}) {
   return res.json()
 }
 
-// ── Blob fetch (CSV export) ───────────────────────────────────────
 async function adminFetchBlob(path: string): Promise<Blob> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { Authorization: `Bearer ${getAccessToken()}` },
@@ -507,20 +779,8 @@ async function adminFetchBlob(path: string): Promise<Blob> {
   return res.blob()
 }
 
-// ── Shared error parser ───────────────────────────────────────────
-export function parseApiError(err: any): string {
-  const data = err?.data
-  if (!data || typeof data !== "object") return err?.message || "Something went wrong"
-  return Object.entries(data)
-    .map(([field, errors]) => {
-      const label = field === "non_field_errors" || field === "detail" ? "" : `${field}: `
-      const msg   = Array.isArray(errors) ? errors.join(", ") : String(errors)
-      return `${label}${msg}`
-    })
-    .join("\n")
-}
+// ── Admin Types ───────────────────────────────────────────────────
 
-// ── Types ─────────────────────────────────────────────────────────
 export interface AdminBooking {
   id:             number
   reference:      string
@@ -566,6 +826,9 @@ export interface AdminActivity {
   display_order:       number
   description:         string
   rules_text:          string
+  // ── Age restriction ────────────────────────────────────────────
+  min_age: number | null     // set via admin panel to restrict children
+  children_allowed: boolean  // read-only computed field from backend
 }
 
 export interface AdminSlot {
@@ -641,7 +904,8 @@ export interface BlockedDate {
   activity: number | null
 }
 
-// ── API ───────────────────────────────────────────────────────────
+// ── Admin API ─────────────────────────────────────────────────────
+
 export const adminApi = {
 
   login: async (username: string, password: string) => {
@@ -660,7 +924,6 @@ export const adminApi = {
     window.location.href = "/admin/login"
   },
 
-  // ── Dashboard ─────────────────────────────────────────────────
   dashboard: {
     stats: (): Promise<DashboardStats> =>
       adminFetch("/api/v1/admin/reports/dashboard/"),
@@ -672,7 +935,6 @@ export const adminApi = {
       adminFetch("/api/v1/admin/reports/activity-breakdown/"),
   },
 
-  // ── Reports ───────────────────────────────────────────────────
   reports: {
     daily: (date?: string): Promise<DailyReport> => {
       const qs = date ? `?date=${date}` : ""
@@ -686,7 +948,6 @@ export const adminApi = {
       adminFetchBlob(`/api/v1/admin/reports/export/?from=${from}&to=${to}`),
   },
 
-  // ── Bookings ──────────────────────────────────────────────────
   bookings: {
     list: (params?: Record<string, string>): Promise<{ results: AdminBooking[]; count: number }> => {
       const qs = params ? "?" + new URLSearchParams(params).toString() : ""
@@ -711,7 +972,6 @@ export const adminApi = {
       adminFetch(`/api/v1/admin/bookings/${id}/complete/`, { method: "POST" }),
   },
 
-  // ── Activities ────────────────────────────────────────────────
   activities: {
     list: (): Promise<AdminActivity[]> =>
       adminFetch("/api/v1/admin/activities/"),
@@ -743,7 +1003,6 @@ export const adminApi = {
       })
     },
 
-    // ── Slots ────────────────────────────────────────────────
     slots: {
       list: (activityId: string | number): Promise<AdminSlot[]> =>
         adminFetch(`/api/v1/admin/activities/${activityId}/slots/`),
@@ -764,7 +1023,6 @@ export const adminApi = {
         adminFetch(`/api/v1/admin/slots/${slotId}/`, { method: "DELETE" }),
     },
 
-    // ── Rules ────────────────────────────────────────────────
     rules: {
       list: (activityId: string | number): Promise<AdminRule[]> =>
         adminFetch(`/api/v1/admin/activities/${activityId}/rules/`),
@@ -788,7 +1046,6 @@ export const adminApi = {
     },
   },
 
-  // ── Availability / Blocked Dates ──────────────────────────────
   availability: {
     list: (month?: number, year?: number): Promise<BlockedDate[]> => {
       const params = new URLSearchParams()
