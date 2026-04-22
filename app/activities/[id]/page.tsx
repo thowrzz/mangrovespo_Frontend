@@ -383,9 +383,10 @@ export default function ActivityDetailPage() {
         <div className="md:col-span-2 flex flex-col gap-10">
           <section>
             <h2 className="text-xl font-bold text-white mb-3">About This Activity</h2>
-            <p className="text-muted-foreground leading-relaxed text-[15px]">
-              {activity.description}
-            </p>
+            <div
+  className="text-muted-foreground leading-relaxed text-[15px]"
+  dangerouslySetInnerHTML={{ __html: activity.description }}
+/>
           </section>
 
           {activity.rules && activity.rules.length > 0 && (
