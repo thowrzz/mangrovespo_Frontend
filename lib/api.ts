@@ -229,9 +229,7 @@
 //       return `${label}${msg}`
 //     })
 //     .join('\n')
-// }
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// }const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // ── Token helper ──────────────────────────────────────────────────
 function getToken(): string | null {
@@ -286,7 +284,7 @@ export interface Activity {
   duration: string
   base_price: string
   child_price: string | null
-  extra_person_charge: string | null   // ✅ moved here — needed on list cards too
+  extra_person_charge: string | null
   pricing_type: 'per_person' | 'per_group'
   min_persons: number
   max_persons: number
@@ -297,7 +295,6 @@ export interface Activity {
 
 export interface ActivityDetail extends Activity {
   description: string
-  // extra_person_charge inherited from Activity ✅
   slots: TimeSlot[]
   rules: ActivityRule[]
 }
@@ -340,6 +337,18 @@ export interface PaymentVerifyPayload {
   razorpay_order_id:   string
   razorpay_payment_id: string
   razorpay_signature:  string
+}
+
+// ── NEW: matches exactly what the backend returns ─────────────────
+export interface PaymentVerifyResponse {
+  success:            boolean
+  booking_reference:  string
+  amount_paid:        string
+  balance_due:        string
+  grand_total:        string
+  customer_name:      string
+  customer_email:     string
+  already_confirmed?: boolean
 }
 
 export interface BookingLookupResponse {
@@ -433,8 +442,9 @@ export const api = {
   },
 
   payments: {
+    // ── FIXED: return type now matches backend response exactly ───
     verify: (data: PaymentVerifyPayload) =>
-      apiFetch<{ status: string; booking_reference: string; message: string }>(
+      apiFetch<PaymentVerifyResponse>(
         '/api/v1/payments/verify/',
         { method: 'POST', body: JSON.stringify(data) }
       ),
