@@ -178,7 +178,6 @@ export function MobileBottomBar() {
                 <X className="text-white" />
               </button>
             </div>
-
             <div className="space-y-3">
               {phoneNumbers.map((number, index) => (
                 <a
