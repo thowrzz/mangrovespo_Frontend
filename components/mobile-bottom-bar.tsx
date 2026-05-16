@@ -210,7 +210,7 @@ export function MobileBottomBar() {
           </Button>
 
           {/* WhatsApp */}
-          <a
+          {/* <a
             href="https://wa.me/917561001268"
             target="_blank"
             rel="noopener noreferrer"
@@ -222,7 +222,25 @@ export function MobileBottomBar() {
               <MessageCircle size={18} />
               <span className="text-xs font-semibold">WhatsApp</span>
             </Button>
-          </a>
+          </a> */}
+          {/* WhatsApp */}
+<a
+  href={`https://wa.me/917561001268?text=${encodeURIComponent(
+    `Hello Mangrove Spot Adventures 🌿
+    
+I would like to know more about your packages and booking details.`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Button
+    size="sm"
+    className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2 shadow-md transition active:scale-95"
+  >
+    <MessageCircle size={18} />
+    <span className="text-xs font-semibold">WhatsApp</span>
+  </Button>
+</a>
 
           {/* Book — goes directly to /booking */}
           <Button
