@@ -1,6 +1,7 @@
 import { HeroSection } from '@/components/hero-section'
 import { ActivitiesSection } from '@/components/activities-section'
 import { WhyUsSection } from '@/components/why-us-section'
+import { LocationMapSection } from '@/components/location-map-section'
 import { GallerySection } from '@/components/gallery-section'
 import { ReviewsSection } from '@/components/reviews-section'
 import { CtaSection } from '@/components/cta-section'
@@ -11,9 +12,10 @@ export default function Home() {
   return (
     <main className="bg-background">
       <HeroSection />
-       <ActivitiesSection /> 
+      <ActivitiesSection />
       <WhyUsSection />
-       <GallerySection /> 
+      <LocationMapSection />
+      <GallerySection />
       <ReviewsSection />
       <CtaSection />
       <Footer />
