@@ -45,7 +45,7 @@ export function HeroSection() {
 
   /* ================= WHATSAPP ================= */
   const handleWhatsApp = () => {
-    const message = `Hello Mangrove Spot Adventures 🌿\n\nI would like to make a booking.\n\nPlease share more details.`
+    const message = `Hello MangroveSpot 🌿\n\nI'd like to know more about your activities and book a slot.\n\nLocation: Nedungolam, Paravur, Kollam, Kerala\n\nPlease share available dates and packages. Thank you!`
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank')
   }
 
@@ -91,6 +91,7 @@ export function HeroSection() {
 
       {/* ================= NAVBAR ================= */}
       <nav
+        aria-label="Main navigation"
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled ? 'bg-background/80 backdrop-blur-md shadow-lg' : 'bg-transparent'
         }`}
@@ -99,10 +100,10 @@ export function HeroSection() {
 
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Mangrove Spot Logo" width={45} height={45} priority />
+            <Image src="/logo.png" alt="Mangrove Spot Adventures logo" width={45} height={45} priority />
             <Image
               src="/text.svg"
-              alt="Mangrove Spot Logo"
+              alt="MangroveSpot – Mangrove Kayaking in Kollam Kerala"
               width={150}
               height={50}
               priority
@@ -121,6 +122,14 @@ export function HeroSection() {
                 {item.label}
               </button>
             ))}
+
+            {/* Blog link */}
+            <Link
+              href="/blog"
+              className="text-white hover:text-accent transition-colors font-medium"
+            >
+              Blog
+            </Link>
 
             {/* My Bookings — desktop, only when logged in */}
             {user && (
@@ -156,6 +165,15 @@ export function HeroSection() {
               </button>
             ))}
 
+            {/* Blog link — mobile */}
+            <Link
+              href="/blog"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full text-left text-white hover:text-accent py-1 font-medium"
+            >
+              Blog
+            </Link>
+
             {/* My Bookings — mobile, only when logged in */}
             {user && (
               <button
@@ -171,7 +189,7 @@ export function HeroSection() {
       </nav>
 
       {/* ================= HERO SECTION ================= */}
-      <section className="relative h-screen w-full overflow-hidden">
+      <section role="banner" aria-label="MangroveSpot hero – Mangrove Adventures in Kollam Kerala" className="relative h-screen w-full overflow-hidden">
 
         {/* Background Video */}
         <div className="absolute inset-0">
@@ -189,10 +207,11 @@ export function HeroSection() {
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
           <div className="space-y-6 max-w-3xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
-              Explore the Mangrove Spot Adventures
+              Mangrove Kayaking & Backwater Adventures in Kollam, Kerala
             </h1>
             <p className="text-lg sm:text-xl text-gray-200">
-              Kayaking • Country Boat Ride • Stand Up Paddle • Coracle Ride • ATV Ride • High Speed Engine Boat Ride
+              Kayaking · Coracle Ride · Country Boat · SUP · ATV · High-Speed Boat<br />
+              Open daily 6:30 AM – 6:30 PM · Nedungolam, Paravur, Kollam
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
               <Button
@@ -201,7 +220,7 @@ export function HeroSection() {
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold rounded-full px-8"
               >
                 <CalendarDays className="mr-2" size={18} />
-                Book Now
+                Book Now – Save 25% Online
               </Button>
               <Button
                 size="lg"
@@ -210,7 +229,7 @@ export function HeroSection() {
                 className="border-white text-white hover:bg-white hover:text-black rounded-full px-8"
               >
                 <Phone className="mr-2" size={18} />
-                Call Now
+                Call to Ask a Question
               </Button>
             </div>
           </div>

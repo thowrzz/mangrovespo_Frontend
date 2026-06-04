@@ -319,6 +319,22 @@ export default function ActivityDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
+  // ── Dynamic title & meta for SEO (client-side update) ──────────
+  useEffect(() => {
+    if (!activity) return
+    const pageTitle = `${activity.name} in Kollam, Kerala – MangroveSpot`
+    document.title = pageTitle
+
+    // Update meta description
+    let metaDesc = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.name = 'description'
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.content = `Book ${activity.name} at MangroveSpot, Nedungolam, Paravur, Kollam. ${activity.tagline}. Pre-book online and save 25%. Open daily 6:30 AM–6:30 PM.`
+  }, [activity])
+
   if (loading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <Loader2 className="animate-spin text-accent mr-2" size={32} />
@@ -344,7 +360,7 @@ export default function ActivityDetailPage() {
     <main className="min-h-screen bg-background">
       {/* ── Hero Image ─────────────────────────────────────── */}
       <div className="relative w-full h-[50vh] md:h-[65vh]">
-        <Image src={image} alt={activity.name} fill priority className="object-cover" />
+        <Image src={image} alt={`${activity.name} at MangroveSpot, Nedungolam, Paravur, Kollam, Kerala`} fill priority className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
 
         <button

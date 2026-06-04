@@ -36,47 +36,47 @@ const galleryImages = [
   {
     id: 1,
     src: '/con1.png',
-    alt: 'Kayaking in Kerala mangrove backwaters',
+    alt: 'Guests kayaking through mangrove canals at MangroveSpot, Nedungolam, Kollam',
   },
   {
     id: 2,
     src: '/ATV-Ride.jpg',
-    alt: 'Traditional Kerala country boat in backwaters',
+    alt: 'ATV off-road ride near the mangrove reserve, MangroveSpot Paravur Kerala',
   },
   {
     id: 3,
     src: '/BumperSofaRide1.jpg',
-    alt: 'Backwater cruise surrounded by coconut trees',
+    alt: 'Bumper sofa ride on the backwaters, MangroveSpot Kollam',
   },
   {
     id: 4,
     src: '/arch.jpg',
-    alt: 'Sunrise over Kerala tropical waterway',
+    alt: 'Archery activity session with guide, MangroveSpot Kerala',
   },
   {
     id: 5,
     src: '/stand.jpg',
-    alt: 'Coracle ride experience in calm waters',
+    alt: 'Stand-up paddleboarding on calm mangrove backwaters, Nedungolam Kollam',
   },
   {
     id: 6,
     src: '/hq.png',
-    alt: 'ATV off-road adventure near riverside',
+    alt: 'MangroveSpot activity area with mangrove forest backdrop, Paravur Kerala',
   },
 ]
 
 
 export function GallerySection() {
   return (
-    <section id="gallery" className="py-20 bg-background">
+    <section id="gallery" aria-label="MangroveSpot photo gallery" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Adventure Gallery
+            See the Mangroves Up Close
           </h2>
           <p className="text-lg text-muted-foreground">
-            Glimpses of unforgettable moments in paradise
+            Real moments from real guests — kayaking through narrow canals, watching birds at sunrise, drifting on a coracle in still water.
           </p>
         </div>
 

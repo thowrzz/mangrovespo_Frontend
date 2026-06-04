@@ -33,18 +33,82 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/lib/cart-context"
 import { AuthProvider } from "@/lib/auth-context"   // ← add this import
 import { Toaster } from "sonner"
+import { JsonLd } from "@/components/JsonLd"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "MangroveSpot Adventures",
-  description: "Premium eco-adventure experiences in the mangroves of Kerala",
+  metadataBase: new URL("https://www.mangrovespot.in"),
+  applicationName: "MangroveSpot Adventures",
+  title: "MangroveSpot – Mangrove Kayaking & Backwater Adventures in Kollam, Kerala",
+  description:
+    "Book mangrove kayaking, coracle rides, country boat tours, ATV & SUP at MangroveSpot – Nedungolam, Paravur, Kollam. Open daily 6:30 AM–6:30 PM. Pre-book online and save 25%. 4.9★ on Google.",
+  keywords: [
+    "mangrove kayaking Kollam",
+    "backwater tour Paravur Kerala",
+    "coracle ride Kollam",
+    "boat ride Nedungolam",
+    "eco tourism Kollam Kerala",
+    "mangrove tour Kerala",
+    "things to do in Kollam",
+    "adventure activities near Varkala",
+    "kayaking near Thiruvananthapuram",
+    "family boat ride Kerala",
+  ],
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "MangroveSpot – Mangrove Kayaking & Backwater Adventures in Kollam, Kerala",
+    description:
+      "Kayaking, coracle rides, country boat tours & more at Nedungolam, Paravur, Kollam. Book online for 25% off. Open daily 6:30 AM–6:30 PM.",
+    url: "https://www.mangrovespot.in",
+    siteName: "MangroveSpot Adventures",
+    locale: "en_IN",
+    type: "website",
+    images: [
+      {
+        url: "https://www.mangrovespot.in/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Mangrove kayaking at MangroveSpot, Nedungolam, Paravur, Kollam, Kerala",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MangroveSpot – Mangrove Kayaking in Kollam, Kerala",
+    description:
+      "Book kayaking, coracle rides, ATV & more at Nedungolam, Paravur, Kollam. Save 25% online. 4.9★ rated.",
+    images: ["https://www.mangrovespot.in/og-image.jpg"],
+  },
+  alternates: {
+    canonical: "https://www.mangrovespot.in",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  // Chrome / Android address-bar colour
+  other: {
+    "theme-color": "#16a34a",
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "MangroveSpot",
+  },
 }
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <JsonLd />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AuthProvider>           {/* ← wrap CartProvider with this */}
             <CartProvider>

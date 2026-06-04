@@ -5,10 +5,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 export function Footer() {
   return (
-    <footer className="bg-background border-t border-border">
+    <footer role="contentinfo" aria-label="MangroveSpot site footer" className="bg-background border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-8">
 
           {/* Brand */}
           <div className="space-y-4">
@@ -30,7 +30,8 @@ export function Footer() {
 
           </Link>
             <p className="text-muted-foreground">
-              Premium eco-adventure experiences in Nedungolam, Paravur, Kollam – Kerala.
+              Mangrove kayaking, coracle rides, country boat tours, ATV, SUP &amp; more.<br />
+              Nedungolam, Paravur, Kollam – Kerala 691334.
             </p>
           </div>
 
@@ -83,7 +84,7 @@ export function Footer() {
 
           {/* Location & Social */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Location</h3>
+            <h3 className="text-lg font-semibold text-white">Visit Us</h3>
 
             <div className="flex items-start gap-2 text-muted-foreground">
               <MapPin size={18} className="mt-1 flex-shrink-0" />
@@ -115,6 +116,24 @@ export function Footer() {
                 @mangrovespot
               </a>
 
+              <p className="text-sm text-muted-foreground">
+                Open daily 6:30 AM – 6:30 PM<br />
+                Last entry: 5:00 PM
+              </p>
+
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Quick Links</h3>
+            <div className="space-y-2">
+              <Link href="/#activities" className="block text-muted-foreground hover:text-accent transition text-sm">All Activities</Link>
+              <Link href="/booking" className="block text-muted-foreground hover:text-accent transition text-sm">Book Now</Link>
+              <Link href="/blog" className="block text-muted-foreground hover:text-accent transition text-sm">Travel Blog</Link>
+              <Link href="/#why-us" className="block text-muted-foreground hover:text-accent transition text-sm">Why MangroveSpot</Link>
+              <Link href="/#reviews" className="block text-muted-foreground hover:text-accent transition text-sm">Guest Reviews</Link>
+              <Link href="/#gallery" className="block text-muted-foreground hover:text-accent transition text-sm">Photo Gallery</Link>
             </div>
           </div>
 
@@ -122,7 +141,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-border pt-6 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} Mangrove Spot. All rights reserved.
+          © {new Date().getFullYear()} MangroveSpot Adventures · Nedungolam, Paravur, Kollam, Kerala. All rights reserved.
         </div>
 
       </div>

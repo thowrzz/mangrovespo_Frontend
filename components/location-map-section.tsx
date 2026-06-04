@@ -5,10 +5,11 @@ export function LocationMapSection() {
         {/* Section Header */}
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-            Find Us
+            How to Reach MangroveSpot, Nedungolam
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Come visit us — we'd love to see you in person.
+            We’re at Nedungolam, Paravur, Kollam — about 30 km from Kollam city and 45 km from Varkala.<br />
+            Parking available on-site. Nearest landmark: Nedungolam bridge.
           </p>
         </div>
 
@@ -45,7 +46,7 @@ export function LocationMapSection() {
                   d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"
                 />
               </svg>
-              Mangrove Spot, Kerala, India
+              MangroveSpot – Nedungolam, Paravur, Kollam, Kerala 691334
             </p>
 
             {/* Rating badge */}
@@ -82,7 +83,7 @@ export function LocationMapSection() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
           >
-            Get Directions
+            Open in Google Maps →
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-4 w-4"

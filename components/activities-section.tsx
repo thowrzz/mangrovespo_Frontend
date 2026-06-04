@@ -342,23 +342,22 @@ export function ActivitiesSection() {
                   className="text-emerald-400"
                   style={{ animation: "text-glow 2.5s ease-in-out infinite" }}
                 >
-                  Get 25% Off
+                  Save 25%
                 </span>{" "}
-                — Book Now, Save More!
+                — Lock In Your Slot, Pay Balance at Venue
               </h3>
 
               <p className="text-muted-foreground text-sm mt-1.5">
-                Book in advance through our website and enjoy{" "}
-                <span className="text-white font-semibold">25% discount</span> on all activities.{" "}
-                <span className="text-white/60">Walk-in visitors pay full price.</span>
+                Online bookings get 25% off every activity. Walk-in visitors pay the full rate.{" "}
+                <span className="text-white/60">No full payment needed — just 50% advance online, rest when you arrive.</span>
               </p>
 
               {/* 3-step flow */}
               <div className="flex items-center gap-3 mt-3 flex-wrap justify-center sm:justify-start">
                 {[
-                  { step: "1", text: "Pick activities" },
+                  { step: "1", text: "Choose your activity" },
                   { step: "2", text: "Pay 50% advance online" },
-                  { step: "3", text: "Pay balance at venue" },
+                  { step: "3", text: "Pay balance at MangroveSpot" },
                 ].map((s, i) => (
                   <div key={i} className="flex items-center gap-1.5">
                     <span className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold flex items-center justify-center shrink-0">
@@ -385,19 +384,19 @@ export function ActivitiesSection() {
                     animation: "shimmer-sweep 2.5s ease-in-out infinite",
                   }}
                 />
-                <span className="relative flex items-center gap-2">
-                  🎯 Book Now &amp; Save 25%
-                </span>
+                  <span className="relative flex items-center gap-2">
+                    🎯 Secure My Slot – 25% Off
+                  </span>
               </Button>
               <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-1.5 bg-background/50 border border-white/10 rounded-full px-3 py-1.5">
-                  <Zap size={11} className="text-emerald-400" />
-                  <span className="text-xs text-white font-medium whitespace-nowrap">Instant Confirmation</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-background/50 border border-white/10 rounded-full px-3 py-1.5">
-                  <Shield size={11} className="text-emerald-400" />
-                  <span className="text-xs text-white font-medium whitespace-nowrap">Secure Payment</span>
-                </div>
+                  <div className="flex items-center gap-1.5 bg-background/50 border border-white/10 rounded-full px-3 py-1.5">
+                    <Zap size={11} className="text-emerald-400" />
+                    <span className="text-xs text-white font-medium whitespace-nowrap">⚡ Instant Booking Confirmation</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-background/50 border border-white/10 rounded-full px-3 py-1.5">
+                    <Shield size={11} className="text-emerald-400" />
+                    <span className="text-xs text-white font-medium whitespace-nowrap">🔒 Secure Payment · Razorpay / UPI</span>
+                  </div>
               </div>
             </div>
           </div>
@@ -405,17 +404,18 @@ export function ActivitiesSection() {
 
         {/* ── Section Header ──────────────────────────────────────── */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-white mb-4">Our Adventures</h2>
+          <h2 className="text-4xl font-bold text-white mb-4">Things to Do in Nedungolam Backwaters, Kollam</h2>
           <p className="text-lg text-muted-foreground mb-6">
-            Choose from our premium eco-adventure experiences.
+            6 activity types, transparent pricing, and guides who know every waterway.<br />
+            Book online to lock in your slot at 25% below walk-in price.
           </p>
           <div className="flex justify-center">
             <div className="bg-accent/10 border border-accent/30 px-6 py-3 rounded-xl">
               <div className="flex items-center gap-2 text-accent font-semibold justify-center">
                 <Clock size={18} />
-                Timings: 6:30 AM – 5:00 PM
+                Open Daily: 6:30 AM – 6:30 PM
               </div>
-              <div className="text-sm text-muted-foreground mt-1">Closing Time: 6:30 PM</div>
+              <div className="text-sm text-muted-foreground mt-1">Last entry: 5:00 PM · Nedungolam, Paravur, Kollam</div>
             </div>
           </div>
         </div>
@@ -487,7 +487,7 @@ export function ActivitiesSection() {
 
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-                        View Details
+                        See Full Details & Timings
                       </span>
                     </div>
                   </div>
@@ -545,14 +545,14 @@ export function ActivitiesSection() {
                             animation: "shimmer-sweep 3s ease-in-out infinite",
                           }}
                         />
-                        <span className="relative">🎯 Pre-Book &amp; Get 25% Off</span>
+                        <span className="relative">Pre-Book & Save 25%</span>
                       </Button>
                       <Button
                         variant="ghost"
                         onClick={() => router.push(`/activities/${activity.id}`)}
                         className="w-full border border-border text-muted-foreground hover:text-white gap-1.5 text-xs"
                       >
-                        <Info size={13} /> View Details
+                        <Info size={13} /> View Details & Duration
                       </Button>
                     </div>
                   </div>
