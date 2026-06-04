@@ -14,7 +14,7 @@ const BASE_URL = "https://www.mangrovespot.in"
 
 async function getActivityIds(): Promise<number[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.mangrovespot.in"}/api/activities/`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.mangrovespot.in"}/api/v1/activities/`, {
       next: { revalidate: 3600 }, // re-fetch at most once per hour
     })
     if (!res.ok) return []
