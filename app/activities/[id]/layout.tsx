@@ -12,7 +12,8 @@ import type { Metadata } from "next"
  * For full per-activity dynamic metadata, refactor the page to a
  * server component with a client sub-component for interactivity.
  */
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
   const defaultMetadata: Metadata = {
     title: "Activity Details – MangroveSpot, Nedungolam, Kollam, Kerala",
     description: "Explore mangrove kayaking, coracle rides, ATV, country boat tours and more at MangroveSpot, Nedungolam, Paravur, Kollam. Book online and save 25%.",
@@ -26,12 +27,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       ],
     },
     alternates: {
-      canonical: `https://www.mangrovespot.in/activities/${params.id}`,
+      canonical: `https://www.mangrovespot.in/activities/${id}`,
     },
   }
 
   try {
-    const numericId = Number(params.id)
+    const numericId = Number(id)
     if (!isNaN(numericId)) {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
       const res = await fetch(`${baseUrl}/api/v1/activities/${numericId}/`, {
@@ -45,7 +46,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
           openGraph: {
             title: `${activity.name} – MangroveSpot, Kollam Kerala`,
             description: activity.tagline,
-            url: `https://www.mangrovespot.in/activities/${params.id}`,
+            url: `https://www.mangrovespot.in/activities/${id}`,
             images: [
               {
                 url: activity.image_url || "https://www.mangrovespot.in/og-image.jpg",
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
             ],
           },
           alternates: {
-            canonical: `https://www.mangrovespot.in/activities/${params.id}`,
+            canonical: `https://www.mangrovespot.in/activities/${id}`,
           },
           robots: {
             index: true,
@@ -68,6 +69,26 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 
   return defaultMetadata
+}
+
+export async function generateStaticParams() {
+  const fallbackIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "11", "12", "13", "14", "15"]
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.mangrovespot.in"
+    const res = await fetch(`${baseUrl}/api/v1/activities/`, {
+      next: { revalidate: 3600 }
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const items: { id: number }[] = Array.isArray(data) ? data : (data.results ?? [])
+      if (items.length > 0) {
+        return items.map((a) => ({ id: String(a.id) }))
+      }
+    }
+  } catch (e) {
+    // Ignore error, return fallback known IDs
+  }
+  return fallbackIds.map((id) => ({ id }))
 }
 
 export default function ActivityLayout({ children }: { children: React.ReactNode }) {

@@ -15,9 +15,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const post = getBlogPost(params.slug)
+  const { slug } = await params
+  const post = getBlogPost(slug)
   if (!post) return { title: "Post Not Found – MangroveSpot Blog" }
 
   return {
@@ -176,8 +177,9 @@ function ArticleJsonLd({ post }: { post: ReturnType<typeof getBlogPost> }) {
 }
 
 /* ─── Page component ────────────────────────────────────────── */
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = getBlogPost(params.slug)
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = getBlogPost(slug)
   if (!post) notFound()
 
   // Related posts (same category or any 2 others)
