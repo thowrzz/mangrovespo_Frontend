@@ -8,19 +8,19 @@ export function JsonLd() {
   const businessSchema = {
     '@context': 'https://schema.org',
     '@type': ['TouristAttraction', 'LocalBusiness'],
-    name: 'MangroveSpot Adventures',
+    name: 'Mangrove Spot',
+    description:
+      'Kayaking, ATV rides, coracle rides, backwater tours and water sports near Varkala and Paravur Lake, Kollam, Kerala.',
     url: 'https://www.mangrovespot.in',
     logo: 'https://www.mangrovespot.in/logo.png',
     image: 'https://www.mangrovespot.in/og-image.jpg',
-    description:
-      'Mangrove kayaking, coracle rides, country boat tours, ATV, and SUP adventures at Nedungolam, Paravur, Kollam, Kerala. Open daily 6:30 AM–6:30 PM.',
     telephone: ['+919496141619', '+917561001268', '+917510301168', '+917510301438'],
     email: 'mangrovespotcare@gmail.com',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Nedungolam',
       addressLocality: 'Paravur',
-      addressRegion: 'Kollam',
+      addressRegion: 'Kollam, Kerala',
       postalCode: '691334',
       addressCountry: 'IN',
     },
@@ -45,6 +45,7 @@ export function JsonLd() {
         closes: '18:30',
       },
     ],
+    openingHours: 'Mo-Su 06:30-18:30',
     priceRange: '₹₹',
     currenciesAccepted: 'INR',
     paymentAccepted: 'Cash, UPI, Credit Card, Debit Card',
@@ -55,9 +56,12 @@ export function JsonLd() {
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.9',
-      reviewCount: '5000',
+      reviewCount: '5332',
       bestRating: '5',
     },
+    hasMap: 'https://maps.google.com/?q=Mangrove+Spot+Kerala',
+    touristType: ['Adventure tourists', 'Family tourists', 'Nature tourists'],
+    areaServed: ['Varkala', 'Kollam', 'Paravur', 'Thiruvananthapuram', 'Nedungolam'],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'MangroveSpot Activities',
@@ -171,7 +175,7 @@ export function JsonLd() {
         name: 'How far is MangroveSpot from Kollam, Varkala, and Thiruvananthapuram?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'MangroveSpot is approximately 30 km from Kollam city (45–50 min drive), 45 km from Varkala (60 min), and 75 km from Thiruvananthapuram (90 min). It is a viable half-day trip from any of these locations.',
+          text: 'MangroveSpot is approximately 30 km from Kollam city (35–40 min drive), 30 km from Varkala (40 min), and 65 km from Thiruvananthapuram (75 min). It is a viable half-day trip from any of these locations.',
         },
       },
     ],

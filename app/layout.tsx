@@ -40,9 +40,9 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.mangrovespot.in"),
   applicationName: "MangroveSpot Adventures",
-  title: "MangroveSpot – Mangrove Kayaking & Backwater Adventures in Kollam, Kerala",
+  title: "Mangrove Spot | Kayaking, ATV Rides & Water Sports near Varkala & Kollam, Kerala",
   description:
-    "Book mangrove kayaking, coracle rides, country boat tours, ATV & SUP at MangroveSpot – Nedungolam, Paravur, Kollam. Open daily 6:30 AM–6:30 PM. Pre-book online and save 25%. 4.9★ on Google.",
+    "Book kayaking, ATV rides, coracle rides, backwater tours & water sports at Mangrove Spot — near Varkala, Paravur Lake, Kollam. Open daily 6:30 AM–6:30 PM. 4.9★ on Google. Pre-book online & save 25%.",
   keywords: [
     "mangrove kayaking Kollam",
     "backwater tour Paravur Kerala",
@@ -54,6 +54,13 @@ export const metadata: Metadata = {
     "adventure activities near Varkala",
     "kayaking near Thiruvananthapuram",
     "family boat ride Kerala",
+    "kayaking varkala",
+    "water sports varkala",
+    "ATV ride near varkala",
+    "adventure activities varkala",
+    "kayaking paravur lake",
+    "things to do near varkala",
+    "backwater tour varkala",
   ],
   icons: {
     icon: [
@@ -63,9 +70,9 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   openGraph: {
-    title: "MangroveSpot – Mangrove Kayaking & Backwater Adventures in Kollam, Kerala",
+    title: "Mangrove Spot | Kayaking, ATV Rides & Water Sports near Varkala & Kollam, Kerala",
     description:
-      "Kayaking, coracle rides, country boat tours & more at Nedungolam, Paravur, Kollam. Book online for 25% off. Open daily 6:30 AM–6:30 PM.",
+      "Book kayaking, ATV rides, coracle rides & water sports at Mangrove Spot — near Varkala, Paravur Lake, Kollam. Save 25% online. Open daily 6:30 AM–6:30 PM.",
     url: "https://www.mangrovespot.in",
     siteName: "MangroveSpot Adventures",
     locale: "en_IN",
@@ -75,15 +82,15 @@ export const metadata: Metadata = {
         url: "https://www.mangrovespot.in/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Mangrove kayaking at MangroveSpot, Nedungolam, Paravur, Kollam, Kerala",
+        alt: "Mangrove kayaking at MangroveSpot, Nedungolam, Paravur, Kollam, Kerala — near Varkala",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MangroveSpot – Mangrove Kayaking in Kollam, Kerala",
+    title: "Kayaking, ATV & Water Sports near Varkala | Mangrove Spot, Kollam",
     description:
-      "Book kayaking, coracle rides, ATV & more at Nedungolam, Paravur, Kollam. Save 25% online. 4.9★ rated.",
+      "Book kayaking, ATV rides, coracle & more near Varkala at Mangrove Spot, Paravur Lake, Kollam. Save 25% online. 4.9★ rated.",
     images: ["https://www.mangrovespot.in/og-image.jpg"],
   },
   alternates: {

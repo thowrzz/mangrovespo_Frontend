@@ -557,6 +557,137 @@ export const blogPosts: BlogPost[] = [
       },
     ],
   },
+  // ─────────────────────────────────────────────────────────────
+  // POST 7: Things to do near Varkala
+  // ─────────────────────────────────────────────────────────────
+  {
+    slug: "things-to-do-near-varkala",
+    title: "10 Best Things to Do near Varkala (Beyond the Beach)",
+    metaTitle: "10 Best Things to Do near Varkala | Day Trips, Adventures & Hidden Gems",
+    metaDescription:
+      "Varkala is famous for its cliffs, but the real adventures are nearby — mangrove kayaking, ATV rides, backwater tours and more. Here's your complete guide to things to do near Varkala.",
+    publishedAt: "2026-06-06",
+    readTime: "9 min",
+    category: "Travel Guide",
+    categoryColor: "emerald",
+    excerpt:
+      "Varkala's cliff beach is iconic. But the most memorable experiences for most visitors happen in the countryside and backwaters within 40 km of Varkala — places most tourists never hear about.",
+    coverImage: "/Mangrove-Kayaking.jpg",
+    coverAlt:
+      "Mangrove kayaking near Varkala at MangroveSpot, Paravur Lake, Kollam, Kerala",
+    tags: [
+      "things to do near varkala",
+      "adventure activities near varkala",
+      "day trip from varkala",
+      "kayaking near varkala",
+      "water sports near varkala",
+      "varkala travel guide",
+      "kollam day trip",
+    ],
+    content: [
+      {
+        type: "p",
+        text: "Varkala is one of Kerala's most atmospheric beach destinations — the 15-metre red laterite cliffs, the cliff-top restaurants, the natural spring beach. But if you stay in Varkala for more than a day, you quickly exhaust the beach. The real diversity of experience in this part of Kerala is within 30–60 km of Varkala town, in the backwaters, mangroves, heritage sites, and inland countryside that most tourists never reach. Here are 10 things genuinely worth doing near Varkala.",
+      },
+      { type: "h2", text: "1. Mangrove Kayaking at MangroveSpot — 30 km from Varkala" },
+      {
+        type: "p",
+        text: "This is the standout nature activity in the region. MangroveSpot at Nedungolam, Paravur is just 30 km from Varkala — about 40 minutes by road. The kayaking route takes you through narrow mangrove canals on Paravur Lake, where the tree canopy forms a closed tunnel overhead. The waterway is calm, shallow, and teeming with birdlife — kingfishers, herons, egrets, and brahminy kites are regularly spotted.",
+      },
+      {
+        type: "p",
+        text: "The guided session lasts approximately 45 minutes and covers around 2 km of waterway. No kayaking experience is needed — every participant receives an ISI-approved life jacket and a guide briefing before entering the water. MangroveSpot is rated 4.9★ on Google with over 5,300 reviews — the highest-rated activity destination in the Varkala–Kollam region.",
+      },
+      {
+        type: "callout",
+        calloutType: "tip",
+        text: "Arrive by 7 AM for the quietest water and best bird activity. Pre-book online to save 25% and guarantee your slot — weekend slots fill quickly.",
+      },
+      {
+        type: "cta",
+        ctaLabel: "Book Kayaking near Varkala",
+        ctaHref: "/kayaking-varkala",
+      },
+      { type: "h2", text: "2. ATV Ride at MangroveSpot — 30 km from Varkala" },
+      {
+        type: "p",
+        text: "MangroveSpot also runs an ATV ride on purpose-built off-road tracks at the same Nedungolam site. The track navigates natural terrain with dirt bends and undulations — exciting without being reckless. Suitable for first-time riders from age 12 upward. Safety gear and instructor support are provided. If you're combining a day trip from Varkala, the ATV + Kayaking combo makes for a perfect half-day.",
+      },
+      {
+        type: "cta",
+        ctaLabel: "ATV Ride near Varkala",
+        ctaHref: "/atv-ride-varkala",
+      },
+      { type: "h2", text: "3. Coracle & Country Boat Ride — 30 km from Varkala" },
+      {
+        type: "p",
+        text: "At MangroveSpot, beyond kayaking, you can experience the coracle — a traditional round fishing boat used by Kerala's river communities for generations. The 20-minute ride on Paravur Lake is genuinely unlike anything at a beach resort. The country boat tour takes you deeper into the backwater channels on a traditional wooden vessel. Both are ideal for families with young children.",
+      },
+      {
+        type: "cta",
+        ctaLabel: "View All Water Sports near Varkala",
+        ctaHref: "/water-sports-varkala",
+      },
+      { type: "h2", text: "4. Varkala Cliff Walk & Papanasam Beach" },
+      {
+        type: "p",
+        text: "Back in Varkala itself, the cliff walk from the North Cliff to the South Cliff is a must. The red laterite cliffs drop sharply to Papanasam Beach below — the beach is considered sacred in Hindu tradition, and a dip here is said to wash away sins. The morning light along the cliff path is spectacular between 6 and 8 AM. The cliff-top restaurants are good for breakfast and coffee with ocean views.",
+      },
+      { type: "h2", text: "5. Janardhana Swami Temple, Varkala" },
+      {
+        type: "p",
+        text: "The Janardhana Swami Temple, believed to be over 2,000 years old, is one of the most important Vishnu temples in Kerala. It's located right at the edge of the cliff, with a dramatic setting above the sea. The temple is open to Hindus only, but the outer compound and the setting are striking from the outside. Non-Hindu visitors can respectfully observe the structure and cliff-side location.",
+      },
+      { type: "h2", text: "6. Sivagiri Mutt — 2 km from Varkala Town" },
+      {
+        type: "p",
+        text: "Sivagiri Mutt is the spiritual and educational institution founded by Sree Narayana Guru, one of Kerala's most significant social reformers. The mutt is set on a hilltop 2 km from Varkala town and offers a panoramic view of the sea and the surrounding countryside. It's a place of genuine historical and cultural importance — worth a visit even for secular travellers interested in Kerala's history.",
+      },
+      { type: "h2", text: "7. Ashtamudi Lake Cruise — 28 km from Varkala" },
+      {
+        type: "p",
+        text: "Ashtamudi is Kerala's second largest wetland and one of the most scenic backwater lakes in the state. A public boat from Kollam jetty runs scenic routes across the lake's multiple arms. If you're already visiting MangroveSpot (30 km from Varkala) for kayaking, adding an Ashtamudi boat cruise from Kollam makes for a well-rounded backwater day.",
+      },
+      { type: "h2", text: "8. Kappil Beach & Kappil Lake — 8 km from Varkala" },
+      {
+        type: "p",
+        text: "Kappil Beach sits where a freshwater lake meets the Arabian Sea. The backwater strip between the lake and the beach is accessible by boat or by walking along the sand. It's quieter and less developed than Varkala's main beach — a good option for anyone wanting a more secluded coastal experience. The sunrise views from Kappil are consistently excellent.",
+      },
+      { type: "h2", text: "9. Anjengo Fort — 20 km from Varkala" },
+      {
+        type: "p",
+        text: "Anjengo (Anchuthengu) Fort is one of the earliest British trading posts in India, established by the East India Company in 1695. The fort ruins overlook a fishing village on a narrow sand spit between the sea and the backwaters. The Portuguese-era lighthouse still operates. This is a genuinely off-the-beaten-path stop — the kind of place that rewards travellers who look beyond the main attractions.",
+      },
+      { type: "h2", text: "10. Kollam Beach & Town Waterfront — 28 km from Varkala" },
+      {
+        type: "p",
+        text: "Kollam city, 28 km from Varkala, has a long, underrated seafront beach and a lively market town atmosphere. The harbour is active with fishing activity throughout the morning. The Tangassery Lighthouse (1902) near the Portuguese fort ruins is worth a short stop. Kollam is a good base for combining with MangroveSpot for a full-day trip from Varkala.",
+      },
+      { type: "h2", text: "Sample Day Trip Itinerary from Varkala" },
+      {
+        type: "ol",
+        items: [
+          "6:15 AM — Depart Varkala for MangroveSpot (30 km, 40 min drive)",
+          "7:00 AM — Arrive MangroveSpot. Guided mangrove kayaking session.",
+          "8:30 AM — Coracle ride add-on or country boat tour",
+          "10:00 AM — ATV ride (optional — combine for the full MangroveSpot experience)",
+          "11:30 AM — Drive to Kollam city (28 km from MangroveSpot). Lunch at a local restaurant.",
+          "1:30 PM — Visit Thangassery Lighthouse and fort ruins",
+          "3:00 PM — Return to Varkala (28 km, ~40 min) for cliff time and sunset",
+        ],
+      },
+      {
+        type: "callout",
+        calloutType: "info",
+        text: "MangroveSpot is open daily from 6:30 AM to 6:30 PM — perfect for an early start from Varkala before the heat of the day. Ample parking on-site.",
+      },
+      {
+        type: "cta",
+        ctaLabel: "Book Your Adventure at MangroveSpot — 30 km from Varkala",
+        ctaHref: "/booking",
+      },
+    ],
+  },
 ]
 
 export function getBlogPost(slug: string): BlogPost | undefined {

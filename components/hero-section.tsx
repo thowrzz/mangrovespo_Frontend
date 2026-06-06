@@ -207,11 +207,11 @@ export function HeroSection() {
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
           <div className="space-y-6 max-w-3xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
-              Mangrove Kayaking & Backwater Adventures in Kollam, Kerala
+              Mangrove Kayaking, ATV Rides &amp; Water Sports near Varkala &amp; Kollam, Kerala
             </h1>
             <p className="text-lg sm:text-xl text-gray-200">
-              Kayaking · Coracle Ride · Country Boat · SUP · ATV · High-Speed Boat<br />
-              Open daily 6:30 AM – 6:30 PM · Nedungolam, Paravur, Kollam
+              Kayaking · ATV Ride · Coracle Ride · Country Boat · SUP · Speed Boat<br />
+              Near Varkala · Paravur Lake · Kollam | Open Daily 6:30 AM – 6:30 PM
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
               <Button

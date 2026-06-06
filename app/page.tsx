@@ -2,6 +2,7 @@ import { HeroSection } from '@/components/hero-section'
 import { ActivitiesSection } from '@/components/activities-section'
 import { WhyUsSection } from '@/components/why-us-section'
 import { LocationMapSection } from '@/components/location-map-section'
+import { VarkalaDistanceSection } from '@/components/varkala-distance-section'
 import { GallerySection } from '@/components/gallery-section'
 import { ReviewsSection } from '@/components/reviews-section'
 import { FaqSection } from '@/components/faq-section'
@@ -16,6 +17,7 @@ export default function Home() {
       <ActivitiesSection />
       <WhyUsSection />
       <LocationMapSection />
+      <VarkalaDistanceSection />
       <GallerySection />
       <ReviewsSection />
       <FaqSection />
