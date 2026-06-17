@@ -6,7 +6,7 @@ import { CalendarDays, MapPin, Clock, Shield, Users, ChevronDown } from 'lucide-
 export const metadata: Metadata = {
   title: 'Kayaking near Varkala | Mangrove Spot — Paravur Lake, Kollam',
   description:
-    'Best kayaking near Varkala at Mangrove Spot, Paravur Lake. 30 km from Varkala. Book online & save 25%. 4.9★ rated. Open daily.',
+    'Best kayaking near Varkala at Mangrove Spot, Paravur Lake. 15 km from Varkala. Book online & save 25%. 4.9★ rated. Open daily.',
   keywords: [
     'kayaking near varkala',
     'kayaking varkala',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Kayaking near Varkala | Mangrove Spot — Paravur Lake, Kollam',
     description:
-      'Best kayaking near Varkala at Mangrove Spot, Paravur Lake. 30 km from Varkala. Book online & save 25%. 4.9★ rated.',
+      'Best kayaking near Varkala at Mangrove Spot, Paravur Lake. 15 km from Varkala. Book online & save 25%. 4.9★ rated.',
     url: 'https://www.mangrovespot.in/kayaking-varkala',
     type: 'website',
     images: [{ url: 'https://www.mangrovespot.in/Mangrove-Kayaking.jpg', alt: 'Kayaking near Varkala at Mangrove Spot, Paravur Lake, Kollam' }],
@@ -35,7 +35,7 @@ const schema = {
       '@type': ['TouristAttraction', 'LocalBusiness'],
       '@id': 'https://www.mangrovespot.in/#business',
       name: 'Mangrove Spot',
-      description: 'Kayaking near Varkala at Paravur Lake. The best mangrove kayaking destination 30 km from Varkala, Kerala.',
+      description: 'Kayaking near Varkala at Paravur Lake. The best mangrove kayaking destination 15 km from Varkala, Kerala.',
       url: 'https://www.mangrovespot.in/kayaking-varkala',
       telephone: '+919496141619',
       address: {
@@ -58,7 +58,7 @@ const schema = {
           name: 'Is there kayaking near Varkala?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! Mangrove Spot at Nedungolam, Paravur is the nearest mangrove kayaking destination from Varkala — just 30 km away (approximately 40 minutes by road). It offers guided kayaking through pristine mangrove canals on Paravur Lake.',
+            text: 'Yes! Mangrove Spot at Nedungolam, Paravur is the nearest mangrove kayaking destination from Varkala — just 15 km away (approximately 25 minutes by road). It offers guided kayaking through pristine mangrove canals on Paravur Lake.',
           },
         },
         {
@@ -66,7 +66,7 @@ const schema = {
           name: 'How far is Mangrove Spot from Varkala?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Mangrove Spot is located 30 km from Varkala Beach, approximately a 40-minute drive via Paravur Road. It is the closest mangrove kayaking destination for tourists staying in Varkala.',
+            text: 'Mangrove Spot is located 15 km from Varkala Beach, approximately a 25-minute drive via Paravur Road. It is the closest mangrove kayaking destination for tourists staying in Varkala.',
           },
         },
         {
@@ -93,11 +93,11 @@ const schema = {
 const faqs = [
   {
     q: 'Is there kayaking near Varkala?',
-    a: 'Yes! Mangrove Spot at Nedungolam, Paravur is the nearest mangrove kayaking destination from Varkala — just 30 km away (approximately 40 minutes by road). It offers guided kayaking through pristine mangrove canals on Paravur Lake.',
+    a: 'Yes! Mangrove Spot at Nedungolam, Paravur is the nearest mangrove kayaking destination from Varkala — just 15 km away (approximately 25 minutes by road). It offers guided kayaking through pristine mangrove canals on Paravur Lake.',
   },
   {
     q: 'How far is Mangrove Spot from Varkala?',
-    a: 'Mangrove Spot is located 30 km from Varkala Beach, approximately a 40-minute drive via Paravur Road. It is the closest mangrove kayaking destination for tourists staying in Varkala.',
+    a: 'Mangrove Spot is located 15 km from Varkala Beach, approximately a 25-minute drive via Paravur Road. It is the closest mangrove kayaking destination for tourists staying in Varkala.',
   },
   {
     q: 'What is the price for kayaking near Varkala?',
@@ -136,11 +136,11 @@ export default function KayakingVarkalaPage() {
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl leading-relaxed">
             The closest mangrove kayaking experience from Varkala. Paddle through ancient mangrove
-            canals on Paravur Lake, guided by certified experts. Just 30 km from Varkala Beach.
+            canals on Paravur Lake, guided by certified experts. Just 15 km from Varkala Beach.
           </p>
           <div className="flex flex-wrap gap-3 mb-8">
             {[
-              { icon: MapPin, text: '30 km from Varkala' },
+              { icon: MapPin, text: '15 km from Varkala' },
               { icon: Clock, text: '45-min guided session' },
               { icon: Shield, text: 'Life jackets provided' },
               { icon: Users, text: 'All skill levels' },
@@ -184,7 +184,7 @@ export default function KayakingVarkalaPage() {
             {[
               {
                 title: 'Closest to Varkala',
-                desc: 'Just 30 km from Varkala Beach — about 40 minutes by road. Perfect for a morning excursion or day trip without long travel time.',
+                desc: 'Just 15 km from Varkala Beach — about 25 minutes by road. Perfect for a morning excursion or day trip without long travel time.',
               },
               {
                 title: 'Pristine Mangrove Canals',
@@ -262,7 +262,7 @@ export default function KayakingVarkalaPage() {
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[
-              { from: 'Varkala Beach', km: '30 km', time: '~40 min' },
+              { from: 'Varkala Beach', km: '15 km', time: '~25 min' },
               { from: 'Kollam City', km: '28 km', time: '~35 min' },
               { from: 'Thiruvananthapuram', km: '65 km', time: '~75 min' },
               { from: 'Alappuzha', km: '85 km', time: '~100 min' },
@@ -352,7 +352,7 @@ export default function KayakingVarkalaPage() {
             />
           </div>
           <p className="text-muted-foreground text-sm mt-3 text-center">
-            📍 Mangrove Spot, Nedungolam, Paravur, Kollam, Kerala 691334 — 30 km from Varkala
+            📍 Mangrove Spot, Nedungolam, Paravur, Kollam, Kerala 691334 — 15 km from Varkala
           </p>
         </div>
       </section>

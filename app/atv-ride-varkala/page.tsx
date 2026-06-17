@@ -56,7 +56,7 @@ const schema = {
           name: 'Is there an ATV ride near Varkala?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! Mangrove Spot offers ATV rides on safe, maintained off-road tracks at Nedungolam, Paravur — just 30 km from Varkala (40 minutes by road). It is the nearest ATV adventure experience for tourists staying in Varkala.',
+            text: 'Yes! Mangrove Spot offers ATV rides on safe, maintained off-road tracks at Nedungolam, Paravur — just 15 km from Varkala (25 minutes by road). It is the nearest ATV adventure experience for tourists staying in Varkala.',
           },
         },
         {
@@ -83,7 +83,7 @@ const schema = {
 const faqs = [
   {
     q: 'Is there an ATV ride near Varkala?',
-    a: 'Yes! Mangrove Spot offers ATV rides on safe, maintained off-road tracks at Nedungolam, Paravur — just 30 km from Varkala (40 minutes by road). It is the nearest ATV adventure experience for tourists staying in Varkala.',
+    a: 'Yes! Mangrove Spot offers ATV rides on safe, maintained off-road tracks at Nedungolam, Paravur — just 15 km from Varkala (25 minutes by road). It is the nearest ATV adventure experience for tourists staying in Varkala.',
   },
   {
     q: 'What is the ATV ride price near Varkala?',
@@ -119,11 +119,11 @@ export default function AtvRideVarkalaPage() {
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl leading-relaxed">
             Conquer maintained off-road tracks on powerful ATVs at Mangrove Spot Adventure Park —
-            just 30 km from Varkala Beach. Suitable for beginners and thrill-seekers alike.
+            just 15 km from Varkala Beach. Suitable for beginners and thrill-seekers alike.
           </p>
           <div className="flex flex-wrap gap-3 mb-8">
             {[
-              { icon: MapPin, text: '30 km from Varkala' },
+              { icon: MapPin, text: '15 km from Varkala' },
               { icon: Clock, text: 'Flexible ride duration' },
               { icon: Shield, text: 'Safety gear included' },
             ].map(({ icon: Icon, text }) => (
@@ -161,7 +161,7 @@ export default function AtvRideVarkalaPage() {
             Mangrove Spot&apos;s ATV track at Nedungolam is built for off-road excitement in a safe,
             controlled environment. Riders navigate a purpose-built course with natural terrain
             features — dirt tracks, turns, and undulations — set amidst the scenic Paravur
-            backwater landscape, just 30 km from Varkala.
+            backwater landscape, just 15 km from Varkala.
           </p>
           <p className="text-muted-foreground leading-relaxed mb-8">
             Whether you&apos;re a first-time rider or an experienced adventurer, our instructors tailor the
@@ -184,18 +184,16 @@ export default function AtvRideVarkalaPage() {
         </div>
       </section>
 
-      {/* ── Age / Requirements ── */}
+      {/* ── Safety / Requirements ── */}
       <section className="py-12 px-4 bg-card/30 border-y border-border/50">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-white mb-5">Age &amp; Requirements</h2>
+          <h2 className="text-2xl font-bold text-white mb-5">Requirements &amp; Safety</h2>
           <ul className="space-y-3">
             {[
-              '✅ Minimum age: 12 years (accompanied by adult)',
               '✅ No prior riding experience needed',
               '✅ Helmet and safety gear provided on-site',
               '✅ Instructors present throughout the session',
               '⚠️ Riders must follow track rules and instructor guidance',
-              '⚠️ Not suitable for children below 12 years (try kayaking or coracle instead)',
             ].map((item) => (
               <li key={item} className="text-muted-foreground text-sm flex items-start gap-2">
                 <span className="mt-0.5">{item.slice(0, 2)}</span>
@@ -238,7 +236,7 @@ export default function AtvRideVarkalaPage() {
           <h2 className="text-2xl font-bold text-white mb-5">Distance from Varkala &amp; Nearby Cities</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { from: 'Varkala Beach', km: '30 km', time: '~40 min' },
+              { from: 'Varkala Beach', km: '15 km', time: '~25 min' },
               { from: 'Kollam City', km: '28 km', time: '~35 min' },
               { from: 'Thiruvananthapuram', km: '65 km', time: '~75 min' },
               { from: 'Alappuzha', km: '85 km', time: '~100 min' },

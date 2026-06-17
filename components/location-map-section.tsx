@@ -8,7 +8,7 @@ export function LocationMapSection() {
             How to Reach MangroveSpot, Nedungolam
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            We’re at Nedungolam, Paravur, Kollam — about 30 km from Kollam city and 45 km from Varkala.<br />
+            We’re at Nedungolam, Paravur, Kollam — about 30 km from Kollam city and 15 km from Varkala.<br />
             Parking available on-site. Nearest landmark: Nedungolam bridge.
           </p>
         </div>

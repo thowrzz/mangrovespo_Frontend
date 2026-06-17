@@ -10,7 +10,7 @@ import {
 const faqs = [
   {
     question: "Where exactly is MangroveSpot located?",
-    answer: "MangroveSpot is at Nedungolam, Paravur, Kollam, Kerala — PIN 691334. We are approximately 30 km from Kollam city centre and about 45 km from Varkala. The nearest landmark is the Nedungolam bridge. On-site parking is available. You can view our location on Google Maps and get directions directly through our map section below.",
+    answer: "MangroveSpot is at Nedungolam, Paravur, Kollam, Kerala — PIN 691334. We are approximately 30 km from Kollam city centre and about 15 km from Varkala. The nearest landmark is the Nedungolam bridge. On-site parking is available. You can view our location on Google Maps and get directions directly through our map section below.",
   },
   {
     question: "What activities are available at MangroveSpot?",
@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     question: "Is MangroveSpot suitable for families with children?",
-    answer: "Yes. We regularly host families with children from age 5 upward. The kayaking and coracle rides are calm and do not require swimming ability or prior experience. Our guides adjust the pace and route to suit the group. For very young children, we recommend the coracle ride or country boat ride.",
+    answer: "Yes. We regularly host families with children of all ages. The kayaking and coracle rides are calm and do not require swimming ability or prior experience. Our guides adjust the pace and route to suit the group. For very young children, we recommend the coracle ride or country boat ride.",
   },
   {
     question: "Can I visit during the monsoon season?",
@@ -46,7 +46,7 @@ const faqs = [
   },
   {
     question: "How far is MangroveSpot from popular tourist spots in Kerala?",
-    answer: "We are ~30 km from Kollam city (45–50 min drive), ~45 km from Varkala (~60 min drive), ~75 km from Thiruvananthapuram (~90 min drive), and ~90 km from Alappuzha (~2 hours). MangroveSpot is a viable half-day activity from any of these locations.",
+    answer: "We are ~30 km from Kollam city (45–50 min drive), ~15 km from Varkala (~25 min drive), ~75 km from Thiruvananthapuram (~90 min drive), and ~90 km from Alappuzha (~2 hours). MangroveSpot is a viable half-day activity from any of these locations.",
   },
 ]
 

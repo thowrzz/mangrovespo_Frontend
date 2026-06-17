@@ -103,7 +103,7 @@ export function JsonLd() {
         name: 'Where exactly is MangroveSpot located?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'MangroveSpot is at Nedungolam, Paravur, Kollam, Kerala — PIN 691334. About 30 km from Kollam city centre and 45 km from Varkala. Parking is available on-site.',
+          text: 'MangroveSpot is at Nedungolam, Paravur, Kollam, Kerala — PIN 691334. About 30 km from Kollam city centre and 15 km from Varkala. Parking is available on-site.',
         },
       },
       {
@@ -151,7 +151,7 @@ export function JsonLd() {
         name: 'Is MangroveSpot suitable for families with children?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. We regularly host families with children from age 5 upward. Coracle and country boat rides are especially suitable for younger children. No swimming ability or prior experience required.',
+          text: 'Yes. We regularly host families with children of all ages. Coracle and country boat rides are especially suitable for younger children. No swimming ability or prior experience required.',
         },
       },
       {
@@ -175,7 +175,7 @@ export function JsonLd() {
         name: 'How far is MangroveSpot from Kollam, Varkala, and Thiruvananthapuram?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'MangroveSpot is approximately 30 km from Kollam city (35–40 min drive), 30 km from Varkala (40 min), and 65 km from Thiruvananthapuram (75 min). It is a viable half-day trip from any of these locations.',
+          text: 'MangroveSpot is approximately 30 km from Kollam city (35–40 min drive), 15 km from Varkala (25 min), and 65 km from Thiruvananthapuram (75 min). It is a viable half-day trip from any of these locations.',
         },
       },
     ],

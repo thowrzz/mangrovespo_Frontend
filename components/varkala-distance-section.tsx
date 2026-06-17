@@ -7,7 +7,7 @@
 import Link from 'next/link'
 
 const distanceData = [
-  { emoji: '📍', from: 'Varkala Beach', km: '30 km', time: '40 min' },
+  { emoji: '📍', from: 'Varkala Beach', km: '15 km', time: '25 min' },
   { emoji: '📍', from: 'Kollam City', km: '28 km', time: '35 min' },
   { emoji: '📍', from: 'Thiruvananthapuram', km: '65 km', time: '75 min' },
   { emoji: '📍', from: 'Alappuzha', km: '85 km', time: '100 min' },
@@ -30,7 +30,7 @@ export function VarkalaDistanceSection() {
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             MangroveSpot is located at Nedungolam, Paravur — just{' '}
-            <strong className="text-foreground">30 km from Varkala</strong> (approx. 40 minutes by road).
+            <strong className="text-foreground">15 km from Varkala</strong> (approx. 25 minutes by road).
             It is the closest mangrove kayaking and water sports destination for tourists staying in Varkala.
           </p>
         </div>

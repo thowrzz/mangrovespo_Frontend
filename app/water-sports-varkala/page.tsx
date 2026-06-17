@@ -1,7 +1,88 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Footer } from '@/components/footer'
-import { CalendarDays, ChevronDown } from 'lucide-react'
+import { CalendarDays, ChevronDown, Clock, Tag } from 'lucide-react'
+
+// Define custom SVG components for activities
+const KayakIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M22 2 2 22" />
+    <path d="M17 3c.7 0 3 1.3 4 2.5s.5 3.3.5 3.3l-5-5s-2.1.5-3.3.5-2.5-4-2.5-4Z" />
+    <path d="M7 21c-.7 0-3-1.3-4-2.5s-.5-3.3-.5-3.3l5 5s2.1-.5 3.3-.5 2.5 4 2.5 4Z" />
+    <path d="M12 2c2 5 2 15 0 20-2-5-2-15 0-20Z" />
+  </svg>
+)
+
+const SupIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M4 14c4 4 12 4 16 0c2-2 3-5 3-8S12 2 4 14Z" />
+    <path d="M2 19c2-1 4-1 6 0c2 1 4 1 6 0c2-1 4-1 6 0" />
+    <path d="M18 2L11 9" />
+    <path d="M10 8h2v2h-2z" />
+  </svg>
+)
+
+const SpeedboatIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M2 15h16l4-5H10L2 15Z" />
+    <path d="M14 10l-1-4h-4l-1 4" />
+    <path d="M4 18c2-1 4 0 6 0" />
+    <path d="M12 18c2-1 4 0 6 0" />
+    <path d="M2 18c1-1 2-1 3 0" />
+    <path d="M19 14l3 2" />
+  </svg>
+)
+
+const CoracleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <ellipse cx="12" cy="12" rx="9" ry="6" />
+    <ellipse cx="12" cy="11" rx="7" ry="4" fill="currentColor" fillOpacity="0.1" />
+    <path d="M12 11l4 7" />
+    <path d="M15 17.5l2.5 2.5-1.5 1.5-2.5-2.5z" />
+    <path d="M6 17c2 .5 4 .5 6 0" />
+    <path d="M14 17c1.5 .5 3 .5 4.5 0" />
+  </svg>
+)
+
+const CountryBoatIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M2 13c5 2 15 2 20 0l-2 3c-4 1-12 1-16 0L2 13Z" />
+    <path d="M6 13c0-4 3-5 6-5s6 1 6 5" />
+    <path d="M9 13c0-3 1.5-4 3-4s3 1 3 4" />
+    <path d="M3 18c3-1 6 0 9 0s6-1 9 0" />
+  </svg>
+)
+
+const BumperSofaIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M4 8v8h16V8c0-2-2-3-4-3H8C6 5 4 6 4 8Z" fill="currentColor" fillOpacity="0.1" />
+    <path d="M4 12h16" />
+    <path d="M8 5v7" />
+    <path d="M16 5v7" />
+    <path d="M2 15c4 2 16 2 20 0" />
+    <path d="M22 13l-4-1" />
+    <path d="M6 18c2-1 4 0 6 0s4-1 6 0" />
+  </svg>
+)
+
+const BananaBoatIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M2 16c6 4 16 4 20 0l-1-3c-3 1-15 1-18 0L2 16Z" fill="currentColor" fillOpacity="0.1" />
+    <path d="M6 14v-3h2v3" />
+    <path d="M11 14v-3h2v3" />
+    <path d="M16 14v-3h2v3" />
+    <path d="M2 19c4-2 16-2 20 0" />
+  </svg>
+)
+
+const RainDanceIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-blue-400" {...props}>
+    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+    <path d="M16 14v6" />
+    <path d="M8 14v6" />
+    <path d="M12 16v6" />
+  </svg>
+)
 
 export const metadata: Metadata = {
   title: 'Water Sports near Varkala | Kayaking, SUP, Speed Boat — Mangrove Spot',
@@ -57,7 +138,7 @@ const schema = {
           name: 'What water sports are available near Varkala?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Mangrove Spot, 30 km from Varkala, offers kayaking, stand-up paddleboarding (SUP), speed boat rides, coracle rides, country boat backwater tours, and bumper sofa rides — all in one location on Paravur Lake.',
+            text: 'Mangrove Spot, 15 km from Varkala, offers kayaking, stand-up paddleboarding (SUP), speed boat rides, coracle rides, country boat backwater tours, and bumper sofa rides — all in one location on Paravur Lake.',
           },
         },
         {
@@ -84,79 +165,93 @@ const schema = {
 const activities = [
   {
     id: 'kayaking',
-    emoji: '🛶',
+    icon: KayakIcon,
     title: 'Mangrove Kayaking',
     desc: 'Paddle through ancient mangrove canals on Paravur Lake, guided by certified experts. The canopy closes overhead as you explore this pristine ecosystem — a unique experience unavailable anywhere else near Varkala.',
     duration: '45 min',
     price: 'Online price (save 25%)',
-    suitable: 'All ages (8+ for independent kayaking)',
     highlight: 'Most Popular',
   },
   {
     id: 'sup',
-    emoji: '🏄',
+    icon: SupIcon,
     title: 'Stand-Up Paddleboarding (SUP)',
     desc: 'Test your balance on a SUP board on the calm backwaters of Paravur Lake. Instructors guide first-timers through the basics — no experience needed. A great full-body workout with stunning water views.',
     duration: '30 min',
     price: 'Online price (save 25%)',
-    suitable: 'Adults & teens (10+)',
     highlight: '',
   },
   {
     id: 'speedboat',
-    emoji: '🚤',
+    icon: SpeedboatIcon,
     title: 'Speed Boat Ride',
     desc: 'Experience the thrill of high-speed cruising across Paravur Lake on a powerful motor boat. Perfect for adrenaline seekers — feel the wind, the spray, and the open water of one of Kerala\'s most beautiful backwaters.',
     duration: '20 min',
     price: 'Online price (save 25%)',
-    suitable: 'All ages',
     highlight: '',
   },
   {
     id: 'coracle',
-    emoji: '🪣',
+    icon: CoracleIcon,
     title: 'Coracle Ride',
     desc: 'Step into a traditional round coracle boat — a vessel used by Kerala\'s fishing communities for generations. Your guide spins and navigates this unique craft on the calm backwaters. Loved by families and children.',
     duration: '20 min',
     price: 'Online price (save 25%)',
-    suitable: 'All ages (including children from 3+)',
     highlight: 'Great for Families',
   },
   {
     id: 'countryboat',
-    emoji: '⛵',
+    icon: CountryBoatIcon,
     title: 'Country Boat / Backwater Tour',
     desc: 'Cruise the Paravur backwater channels on a traditional wooden country boat. This leisurely tour through coconut groves and mangrove edges offers a peaceful window into Kerala\'s backwater life — ideal for all ages.',
     duration: '30–40 min',
     price: 'Online price (save 25%)',
-    suitable: 'All ages',
     highlight: '',
   },
   {
     id: 'bumper',
-    emoji: '💺',
+    icon: BumperSofaIcon,
     title: 'Bumper Sofa Ride',
     desc: 'Grip the handles and hold on tight as the bumper sofa skims across Paravur Lake at speed, pulled by a motor boat. A fun, laughter-filled activity perfect for groups and families seeking a lighter thrill.',
     duration: '15 min',
     price: 'Online price (save 25%)',
-    suitable: 'All ages',
+    highlight: '',
+  },
+  {
+    id: 'banana',
+    icon: BananaBoatIcon,
+    title: 'Banana Boat Ride',
+    desc: 'Hold on tight with your group as you are pulled on a banana-shaped inflatable raft across the water. A thrilling, laugh-out-loud adventure perfect for friends and families.',
+    duration: '1 round',
+    price: 'Online price (save 25%)',
+    highlight: '',
+  },
+  {
+    id: 'raindance',
+    icon: RainDanceIcon,
+    title: 'Rain Dance',
+    desc: 'Enjoy music, lights, and refreshing artificial rain showers near the backwaters. A great way to cool off and have fun in a group.',
+    duration: 'Session based',
+    price: 'Online price (save 25%)',
     highlight: '',
   },
 ]
 
 const comparisonData = [
-  { activity: 'Kayaking', duration: '45 min', suitable: 'All ages (8+)' },
-  { activity: 'SUP', duration: '30 min', suitable: 'Adults (10+)' },
-  { activity: 'Speed Boat', duration: '20 min', suitable: 'All ages' },
-  { activity: 'Coracle Ride', duration: '20 min', suitable: 'All ages (3+)' },
-  { activity: 'Country Boat', duration: '30–40 min', suitable: 'All ages' },
-  { activity: 'Bumper Sofa', duration: '15 min', suitable: 'All ages' },
+  { activity: 'Kayaking', duration: '45 min' },
+  { activity: 'SUP', duration: '30 min' },
+  { activity: 'Speed Boat', duration: '20 min' },
+  { activity: 'Coracle Ride', duration: '20 min' },
+  { activity: 'Country Boat', duration: '30–40 min' },
+  { activity: 'Bumper Sofa', duration: '15 min' },
+  { activity: 'Banana Boat', duration: '1 round' },
+  { activity: 'Rain Dance', duration: 'Session based' },
 ]
 
 const faqs = [
   {
     q: 'What water sports are available near Varkala?',
-    a: 'Mangrove Spot, 30 km from Varkala, offers kayaking, stand-up paddleboarding (SUP), speed boat rides, coracle rides, country boat backwater tours, and bumper sofa rides — all in one location on Paravur Lake.',
+    a: 'Mangrove Spot, 15 km from Varkala, offers kayaking, stand-up paddleboarding (SUP), speed boat rides, coracle rides, country boat backwater tours, and bumper sofa rides — all in one location on Paravur Lake.',
   },
   {
     q: 'Which is the best water sports place near Varkala?',
@@ -192,7 +287,7 @@ export default function WaterSportsVarkalaPage() {
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl leading-relaxed">
             All the water sports you could want — in one stunning location on Paravur Lake, just
-            30 km from Varkala Beach. Kayaking, SUP, speed boat, coracle rides &amp; more.
+            15 km from Varkala Beach. Kayaking, SUP, speed boat, coracle rides &amp; more.
             4.9★ rated. Open daily 6:30 AM–6:30 PM.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -220,30 +315,41 @@ export default function WaterSportsVarkalaPage() {
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-3">All Water Sports near Varkala</h2>
           <p className="text-muted-foreground mb-10">
-            Every activity below is available at Mangrove Spot, Paravur Lake — 30 km / 40 min from Varkala.
+            Every activity below is available at Mangrove Spot, Paravur Lake — 15 km / 25 min from Varkala.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
-            {activities.map(({ id, emoji, title, desc, duration, price, suitable, highlight }) => (
+            {activities.map(({ id, icon: Icon, title, desc, duration, price, suitable, highlight }) => (
               <div
                 key={id}
-                className="bg-card border border-border rounded-2xl p-6 hover:border-primary/30 transition-colors relative overflow-hidden"
+                className="bg-card border border-border rounded-2xl p-6 hover:border-primary/30 transition-colors relative overflow-hidden flex flex-col justify-between"
               >
-                {highlight && (
-                  <span className="absolute top-4 right-4 text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full">
-                    {highlight}
-                  </span>
-                )}
-                <div className="text-3xl mb-3">{emoji}</div>
-                <h3 className="text-white font-bold text-lg mb-2">{title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4">{desc}</p>
-                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground border-t border-border pt-3 mt-2">
-                  <span>⏱ {duration}</span>
-                  <span>👥 {suitable}</span>
-                  <span className="text-primary font-semibold">💰 {price}</span>
+                <div>
+                  {highlight && (
+                    <span className="absolute top-4 right-4 text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full">
+                      {highlight}
+                    </span>
+                  )}
+                  <div className="mb-4">
+                    <Icon className="w-8 h-8 text-blue-400" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-2">{title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">{desc}</p>
                 </div>
-                <Link href="/booking" className="mt-4 inline-flex items-center gap-1 text-primary text-sm font-semibold hover:underline">
-                  Book this activity →
-                </Link>
+                <div>
+                  <div className="flex flex-wrap gap-4 text-xs text-muted-foreground border-t border-border pt-3 mt-2">
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={13} className="text-blue-400 shrink-0" />
+                      {duration}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-primary font-semibold">
+                      <Tag size={13} className="text-primary shrink-0" />
+                      {price}
+                    </span>
+                  </div>
+                  <Link href="/booking" className="mt-4 inline-flex items-center gap-1 text-primary text-sm font-semibold hover:underline">
+                    Book this activity →
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
@@ -260,19 +366,17 @@ export default function WaterSportsVarkalaPage() {
                 <tr className="bg-card/80 border-b border-border">
                   <th className="text-left px-5 py-4 text-white font-bold">Activity</th>
                   <th className="text-left px-5 py-4 text-white font-bold">Duration</th>
-                  <th className="text-left px-5 py-4 text-white font-bold">Suitable For</th>
                   <th className="text-left px-5 py-4 text-white font-bold">Book</th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonData.map(({ activity, duration, suitable }, i) => (
+                {comparisonData.map(({ activity, duration }, i) => (
                   <tr
                     key={activity}
                     className={`border-b border-border/50 hover:bg-card/50 transition-colors ${i === comparisonData.length - 1 ? 'border-b-0' : ''}`}
                   >
                     <td className="px-5 py-3.5 text-foreground font-medium">{activity}</td>
                     <td className="px-5 py-3.5 text-muted-foreground">{duration}</td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{suitable}</td>
                     <td className="px-5 py-3.5">
                       <Link href="/booking" className="text-primary font-semibold hover:underline text-xs">
                         Book →
@@ -295,7 +399,7 @@ export default function WaterSportsVarkalaPage() {
           <h2 className="text-3xl font-bold text-white mb-6">How Far from Varkala?</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
-              { from: 'Varkala Beach', km: '30 km', time: '~40 min' },
+              { from: 'Varkala Beach', km: '15 km', time: '~25 min' },
               { from: 'Kollam City', km: '28 km', time: '~35 min' },
               { from: 'Thiruvananthapuram', km: '65 km', time: '~75 min' },
               { from: 'Alappuzha', km: '85 km', time: '~100 min' },
@@ -342,7 +446,7 @@ export default function WaterSportsVarkalaPage() {
           </h2>
           <p className="text-muted-foreground text-sm mb-6 max-w-lg mx-auto">
             Pre-book online for 25% off. Open daily 6:30 AM – 6:30 PM.
-            30 km from Varkala · Paravur Lake · Kollam, Kerala
+            15 km from Varkala · Paravur Lake · Kollam, Kerala
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/booking" className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-4 rounded-full text-base transition-all hover:scale-105">
