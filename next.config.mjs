@@ -51,6 +51,46 @@ const nextConfig = {
       },
     ]
   },
+
+  async redirects() {
+    return [
+      {
+        source: "/blog/family-safety-guide",
+        destination: "/blog/mangrovespot-families-children-kollam",
+        permanent: true,
+      },
+      {
+        source: "/blog/monsoon-kayaking-guide",
+        destination: "/blog/monsoon-kayaking-kerala-mangroves",
+        permanent: true,
+      },
+      {
+        source: "/blog/first-time-kayaking-guide",
+        destination: "/blog/first-time-kayaking-kerala-guide",
+        permanent: true,
+      },
+      {
+        source: "/blog/school-nature-trips",
+        destination: "/blog/school-nature-trips-kerala-mangroves",
+        permanent: true,
+      },
+      {
+        source: "/blog/best-things-to-do-near-varkala",
+        destination: "/blog/things-to-do-near-varkala",
+        permanent: true,
+      },
+      {
+        source: "/activities",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/activities/",
+        destination: "/",
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default nextConfig

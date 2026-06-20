@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   try {
     const numericId = Number(id)
     if (!isNaN(numericId)) {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.mangrovespot.in"
       const res = await fetch(`${baseUrl}/api/v1/activities/${numericId}/`, {
         next: { revalidate: 3600 } // cache for 1 hour
       })

@@ -15,17 +15,18 @@ export const dynamic = "force-static"
 const BASE_URL = "https://www.mangrovespot.in"
 
 async function getActivityIds(): Promise<number[]> {
+  const fallbackIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15]
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.mangrovespot.in"}/api/v1/activities/`, {
       next: { revalidate: 3600 }, // re-fetch at most once per hour
     })
-    if (!res.ok) return []
+    if (!res.ok) return fallbackIds
     const data = await res.json()
     // API returns either an array or { results: [] }
     const items: { id: number }[] = Array.isArray(data) ? data : (data.results ?? [])
-    return items.map((a) => a.id)
+    return items.length > 0 ? items.map((a) => a.id) : fallbackIds
   } catch {
-    return []
+    return fallbackIds
   }
 }
 
