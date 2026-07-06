@@ -106,15 +106,6 @@ export function Footer() {
                 www.mangrovespot.in
               </a>
 
-              <a
-                href="https://www.mangrovemoments.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition font-medium"
-              >
-                <Globe size={18} className="text-emerald-500" />
-                <span>Sister Site: mangrovemoments.com</span>
-              </a>
 
               <a
                 href="https://instagram.com/mangrovespot"
