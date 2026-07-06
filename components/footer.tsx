@@ -144,14 +144,7 @@ export function Footer() {
               <Link href="/#why-us" className="block text-muted-foreground hover:text-accent transition text-sm">Why MangroveSpot</Link>
               <Link href="/#reviews" className="block text-muted-foreground hover:text-accent transition text-sm">Guest Reviews</Link>
               <Link href="/#gallery" className="block text-muted-foreground hover:text-accent transition text-sm">Photo Gallery</Link>
-              <a
-                href="https://www.mangrovemoments.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-emerald-400 hover:text-accent transition text-sm font-semibold pt-1"
-              >
-                🌿 Sister Site: Mangrove Moments
-              </a>
+         
             </div>
           </div>
 
