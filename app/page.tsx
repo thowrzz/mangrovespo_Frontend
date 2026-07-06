@@ -7,6 +7,7 @@ import { GallerySection } from '@/components/gallery-section'
 import { ReviewsSection } from '@/components/reviews-section'
 import { FaqSection } from '@/components/faq-section'
 import { CtaSection } from '@/components/cta-section'
+import { SisterVenturesSection } from '@/components/sister-ventures-section'
 import { Footer } from '@/components/footer'
 import { MobileBottomBar } from '@/components/mobile-bottom-bar'
 
@@ -22,6 +23,7 @@ export default function Home() {
       <ReviewsSection />
       <FaqSection />
       <CtaSection />
+      <SisterVenturesSection />
       <Footer />
       <MobileBottomBar />
     </main>

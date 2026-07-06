@@ -107,6 +107,16 @@ export function Footer() {
               </a>
 
               <a
+                href="https://www.mangrovemoments.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground hover:text-accent transition font-medium"
+              >
+                <Globe size={18} className="text-emerald-500" />
+                <span>Sister Site: mangrovemoments.com</span>
+              </a>
+
+              <a
                 href="https://instagram.com/mangrovespot"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -134,14 +144,33 @@ export function Footer() {
               <Link href="/#why-us" className="block text-muted-foreground hover:text-accent transition text-sm">Why MangroveSpot</Link>
               <Link href="/#reviews" className="block text-muted-foreground hover:text-accent transition text-sm">Guest Reviews</Link>
               <Link href="/#gallery" className="block text-muted-foreground hover:text-accent transition text-sm">Photo Gallery</Link>
+              <a
+                href="https://www.mangrovemoments.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-emerald-400 hover:text-accent transition text-sm font-semibold pt-1"
+              >
+                🌿 Sister Site: Mangrove Moments
+              </a>
             </div>
           </div>
 
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-border pt-6 text-center text-muted-foreground text-sm">
-          © {new Date().getFullYear()} MangroveSpot Adventures · Nedungolam, Paravur, Kollam, Kerala. All rights reserved.
+        <div className="border-t border-border pt-6 text-center text-muted-foreground text-sm flex flex-col md:flex-row justify-between items-center gap-4">
+          <p>© {new Date().getFullYear()} MangroveSpot Adventures · Nedungolam, Paravur, Kollam, Kerala. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground/60">
+            Developed by{' '}
+            <a 
+              href="https://www.digitalproductsolutions.in/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-accent hover:underline transition"
+            >
+              https://www.digitalproductsolutions.in/
+            </a>
+          </p>
         </div>
 
       </div>
