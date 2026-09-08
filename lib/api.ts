@@ -284,6 +284,7 @@ export interface Activity {
   id: number
   name: string
   tagline: string
+  description?: string          // now included in list serializer
   category: string
   image_url: string
   duration: string
@@ -296,6 +297,7 @@ export interface Activity {
   is_popular: boolean
   requires_prebooking: boolean
   display_order: number
+  min_age?: number | null
 }
 
 export interface ActivityDetail extends Activity {

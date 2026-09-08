@@ -592,20 +592,62 @@ function ActivityDetailModal({
 }
 
 // ─── Combo item parser ─────────────────────────────────────────────
-// Splits tagline on "+" for activities named "combo" or "package".
-// e.g. tagline "Mangrove kayaking+Bumper/Banana ride" → ["Mangrove kayaking", "Bumper/Banana ride"]
-// If no "+" in tagline, returns [] so the tagline is shown as-is.
+// Extracts included activity items from combo/package activities.
+// Handles all 3 formats found in the live database:
+//   1. HTML list:      <ol><li>Country boat ride</li><li>Kayaking</li></ol>
+//   2. Numbered text:  "1.Country boat\n2.ATV ride\n3.Bumper Ride"
+//   3. Plus tagline:   "Mangrove kayaking+Speed boat drifting"
+//   4. "and" tagline:  "Country boat and 30 min Kayaking"
 function parseComboItems(activity: Activity): string[] {
   const nameLower = activity.name.toLowerCase()
   const isCombo   = nameLower.includes("combo") || nameLower.includes("package")
-  if (!isCombo || !activity.tagline || !activity.tagline.includes("+")) return []
-  return activity.tagline.split("+").map(s => s.trim()).filter(Boolean)
+  if (!isCombo) return []
+
+  const desc    = (activity.description || "").trim()
+  const tagline = (activity.tagline || "").trim()
+
+  // 1. HTML list — strip tags, extract <li> content
+  if (desc.includes("<li>")) {
+    const matches = [...desc.matchAll(/<li>([\s\S]*?)<\/li>/gi)]
+    const items   = matches.map(m => m[1].replace(/<[^>]+>/g, "").trim()).filter(Boolean)
+    if (items.length > 0) return items
+  }
+
+  // 2. Numbered text — lines starting with "1." "2." etc.
+  if (/^\d+\./.test(desc)) {
+    const items = desc
+      .split("\n")
+      .map(l => l.replace(/^\d+\.\s*/, "").trim())
+      .filter(Boolean)
+    if (items.length > 0) return items
+  }
+
+  // 3. Plus-separated description
+  if (desc.includes("+")) {
+    const items = desc.split("+").map(s => s.trim()).filter(Boolean)
+    if (items.length > 1) return items
+  }
+
+  // 4. Plus-separated tagline
+  if (tagline.includes("+")) {
+    const items = tagline.split("+").map(s => s.trim()).filter(Boolean)
+    if (items.length > 1) return items
+  }
+
+  // 5. "and"-separated tagline (e.g. "Country boat and 30 min Kayaking")
+  if (tagline.toLowerCase().includes(" and ")) {
+    const items = tagline.split(/ and /i).map(s => s.trim()).filter(Boolean)
+    if (items.length > 1) return items
+  }
+
+  return []
 }
 
 function isComboActivity(activity: Activity): boolean {
   const n = activity.name.toLowerCase()
   return n.includes("combo") || n.includes("package")
 }
+
 
 // ─── Activity Card ────────────────────────────────────────────────
 const ActivityCard = memo(function ActivityCard({
