@@ -11,7 +11,7 @@ import {
   Loader2, ShoppingCart, IndianRupee, ArrowLeft,
   Plus, Check, Calendar, Clock, Users, X,
   LogOut, Mail, ArrowRight, ShieldCheck, Baby, UserRound, Wallet,
-  ChevronDown, UserPlus, AlertTriangle,
+  ChevronDown, UserPlus, AlertTriangle, Info, ChevronRight, ListChecks,
 } from "lucide-react"
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useCart, CartItem, calculateItemPrice, getItemPriceBreakdown } from "@/lib/cart-context"
 import { useActivities } from "@/hooks/useActivities"
-import { api, Activity, parseApiError } from "@/lib/api"
+import { api, Activity, ActivityDetail, parseApiError } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
@@ -409,69 +409,324 @@ function StepBar({ current }: { current: MainStep }) {
   )
 }
 
+// ─── Activity Detail Modal ───────────────────────────────────────────
+function ActivityDetailModal({
+  activity,
+  onClose,
+}: {
+  activity: Activity
+  onClose: () => void
+}) {
+  const [detail, setDetail]   = useState<ActivityDetail | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState<string | null>(null)
+
+  // Lock body scroll
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
+  // Escape key to close
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [onClose])
+
+  // Fetch full activity details
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    api.activities.detail(activity.id)
+      .then(d => setDetail(d))
+      .catch(() => setError("Could not load details. Please try again."))
+      .finally(() => setLoading(false))
+  }, [activity.id])
+
+  const comboItems = parseComboItems(activity)
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${activity.name} details`}
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+      style={{ backdropFilter: "blur(16px)", backgroundColor: "rgba(0,0,0,0.82)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:max-w-lg bg-card border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* ─ Hero image header */}
+        <div className="relative h-44 shrink-0">
+          <Image
+            src={activityImage(activity)}
+            alt={activity.name}
+            fill
+            className="object-cover"
+            sizes="(max-width:640px) 100vw, 512px"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            aria-label="Close details"
+            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+          >
+            <X size={16} />
+          </button>
+          {/* Title overlay */}
+          <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className="text-white font-bold text-lg leading-tight">{activity.name}</p>
+              {(activity.name.toLowerCase().includes("combo") || activity.name.toLowerCase().includes("package")) && (
+                <span className="text-[10px] font-semibold bg-purple-500/25 text-purple-300 border border-purple-500/30 rounded-full px-2 py-0.5">Combo</span>
+              )}
+            </div>
+            <p className="text-white/65 text-xs leading-snug">{activity.tagline}</p>
+          </div>
+        </div>
+
+        {/* ─ Scrollable body */}
+        <div className="overflow-y-auto flex-1 px-5 py-4 flex flex-col gap-5">
+
+          {/* Price & meta chips */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-baseline gap-0.5 mr-1">
+              <span className="text-accent font-bold text-xl">₹{parseFloat(activity.base_price).toLocaleString()}</span>
+              <span className="text-muted-foreground text-xs ml-0.5">{activity.pricing_type === "per_person" ? "/person" : "/group"}</span>
+            </div>
+            {parseFloat(activity.extra_person_charge || "0") > 0 && (
+              <span className="inline-flex items-center gap-1 text-yellow-400 text-[11px] font-medium bg-yellow-400/8 border border-yellow-400/20 rounded-lg px-2 py-1">
+                <UserPlus size={10} />+₹{parseFloat(activity.extra_person_charge!).toLocaleString()}/extra person
+              </span>
+            )}
+            {activity.min_age != null && activity.min_age > 0 && (
+              <span className="inline-flex items-center gap-1 text-orange-400 text-[11px] font-medium bg-orange-400/8 border border-orange-400/20 rounded-lg px-2 py-1">
+                <Baby size={10} />{activity.min_age}+ yrs
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1 text-muted-foreground text-[11px] bg-white/4 border border-white/8 rounded-lg px-2 py-1">
+              <Clock size={10} />{activity.duration}
+            </span>
+          </div>
+
+          {/* What's Included — only for combos with + in tagline */}
+          {comboItems.length > 0 && (
+            <div>
+              <p className="text-white font-semibold text-sm flex items-center gap-1.5 mb-2.5">
+                <ListChecks size={14} className="text-accent" />
+                What&apos;s Included
+              </p>
+              <div className="grid grid-cols-1 gap-2">
+                {comboItems.map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2.5 bg-accent/5 border border-accent/12 rounded-xl px-3.5 py-2.5"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                      <Check size={10} className="text-accent" />
+                    </div>
+                    <span className="text-white/90 text-sm font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* About / description */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-8 gap-2">
+              <Loader2 size={20} className="animate-spin text-accent" />
+              <p className="text-muted-foreground text-sm">Loading details…</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <AlertTriangle size={20} className="text-red-400" />
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
+          ) : detail ? (
+            <>
+              {detail.description && (
+                <div>
+                  <p className="text-white font-semibold text-sm mb-2">About this activity</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{detail.description}</p>
+                </div>
+              )}
+
+              {detail.rules && detail.rules.length > 0 && (
+                <div>
+                  <p className="text-white font-semibold text-sm mb-2.5 flex items-center gap-1.5">
+                    <AlertTriangle size={13} className="text-yellow-400" />
+                    Rules &amp; Requirements
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {detail.rules.map((rule, i) => (
+                      <div key={rule.id ?? i} className="flex items-start gap-2">
+                        <ChevronRight size={13} className="text-accent shrink-0 mt-0.5" />
+                        <span className="text-muted-foreground text-sm leading-snug">{rule.rule}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : null}
+        </div>
+
+        {/* ─ Footer */}
+        <div className="px-5 py-4 border-t border-border shrink-0">
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-2xl border border-border/60 text-muted-foreground text-sm font-medium hover:text-white hover:border-border transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Combo item parser ─────────────────────────────────────────────
+// Splits tagline on "+" for activities named "combo" or "package".
+// e.g. tagline "Mangrove kayaking+Bumper/Banana ride" → ["Mangrove kayaking", "Bumper/Banana ride"]
+// If no "+" in tagline, returns [] so the tagline is shown as-is.
+function parseComboItems(activity: Activity): string[] {
+  const nameLower = activity.name.toLowerCase()
+  const isCombo   = nameLower.includes("combo") || nameLower.includes("package")
+  if (!isCombo || !activity.tagline || !activity.tagline.includes("+")) return []
+  return activity.tagline.split("+").map(s => s.trim()).filter(Boolean)
+}
+
+function isComboActivity(activity: Activity): boolean {
+  const n = activity.name.toLowerCase()
+  return n.includes("combo") || n.includes("package")
+}
+
 // ─── Activity Card ────────────────────────────────────────────────
 const ActivityCard = memo(function ActivityCard({
   activity, added, onToggle, priority = false,
 }: {
   activity: Activity; added: boolean; onToggle: () => void; priority?: boolean
 }) {
+  const [showDetail, setShowDetail] = useState(false)
+  const comboItems = parseComboItems(activity)
+  const isCombo    = isComboActivity(activity)
+
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setShowDetail(true)
+  }
+
   return (
-    <div
-      onClick={onToggle}
-      className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all active:scale-[0.99]
-        ${added
-          ? "border-accent/50 bg-accent/8 ring-1 ring-accent/20"
-          : "border-border bg-card hover:border-border/80 hover:bg-card/80"
-        }`}
-    >
-      <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
-        <Image
-          src={activityImage(activity)} alt={activity.name}
-          fill sizes="56px"
-          priority={priority} loading={priority ? "eager" : "lazy"}
-          className="object-cover"
+    <>
+      <div
+        onClick={onToggle}
+        className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-all active:scale-[0.99]
+          ${added
+            ? "border-accent/50 bg-accent/8 ring-1 ring-accent/20"
+            : "border-border bg-card hover:border-border/80 hover:bg-card/80"
+          }`}
+      >
+        {/* Thumbnail */}
+        <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 mt-0.5">
+          <Image
+            src={activityImage(activity)} alt={activity.name}
+            fill sizes="56px"
+            priority={priority} loading={priority ? "eager" : "lazy"}
+            className="object-cover"
+          />
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+
+          {/* Name + badges */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className="text-white font-semibold text-sm">{activity.name}</p>
+            {activity.is_popular && (
+              <Badge className="bg-accent/20 text-accent border-0 text-[10px] px-1.5 py-0 h-4 shrink-0">Popular</Badge>
+            )}
+            {isCombo && (
+              <Badge className="bg-purple-500/15 text-purple-400 border border-purple-500/25 text-[10px] px-1.5 py-0 h-4 shrink-0">Combo</Badge>
+            )}
+          </div>
+
+          {/* Included items (combo) OR plain tagline */}
+          {comboItems.length > 0 ? (
+            <div className="mt-1 flex flex-col gap-[3px]">
+              {comboItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-1">
+                  <Check size={9} className="text-accent shrink-0" />
+                  <span className="text-muted-foreground text-[11px] leading-snug">{item}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-xs mt-0.5 line-clamp-2">{activity.tagline}</p>
+          )}
+
+          {/* Price row */}
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="text-accent font-bold text-sm">₹{parseFloat(activity.base_price).toLocaleString()}</span>
+            <span className="text-muted-foreground text-xs">
+              {activity.pricing_type === "per_person" ? "/person" : "/group"}
+            </span>
+            {parseFloat(activity.extra_person_charge || "0") > 0 && (
+              <span className="text-yellow-400 text-[10px] font-medium flex items-center gap-0.5">
+                <UserPlus size={9} />
+                +₹{parseFloat(activity.extra_person_charge!).toLocaleString()} extra/person
+              </span>
+            )}
+            {activity.min_age != null && activity.min_age > 0 && (
+              <span className="text-orange-400 text-[10px] font-medium flex items-center gap-0.5">
+                <Baby size={9} />
+                {activity.min_age}+ yrs
+              </span>
+            )}
+            <span className="text-muted-foreground text-xs hidden sm:inline">· {activity.duration}</span>
+          </div>
+
+          {/* See details link */}
+          <button
+            type="button"
+            onClick={handleDetailClick}
+            className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-accent/75 hover:text-accent transition-colors font-medium leading-none"
+          >
+            <Info size={10} />
+            See details
+            <ChevronRight size={9} />
+          </button>
+        </div>
+
+        {/* Add/Remove toggle */}
+        <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border transition-all mt-0.5
+          ${added
+            ? "border-accent bg-accent text-white"
+            : "border-border/60 bg-background text-muted-foreground"
+          }`}>
+          {added ? <Check size={15} /> : <Plus size={15} />}
+        </div>
+      </div>
+
+      {/* Detail modal — rendered outside card div so z-index is unaffected by list stacking */}
+      {showDetail && (
+        <ActivityDetailModal
+          activity={activity}
+          onClose={() => setShowDetail(false)}
         />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <p className="text-white font-semibold text-sm truncate">{activity.name}</p>
-          {activity.is_popular && (
-            <Badge className="bg-accent/20 text-accent border-0 text-[10px] px-1.5 py-0 h-4 shrink-0">Popular</Badge>
-          )}
-        </div>
-        <p className="text-muted-foreground text-xs mt-0.5 truncate">{activity.tagline}</p>
-        <div className="flex items-center gap-2 mt-1 flex-wrap">
-          <span className="text-accent font-bold text-sm">₹{parseFloat(activity.base_price).toLocaleString()}</span>
-          <span className="text-muted-foreground text-xs">
-            {activity.pricing_type === "per_person" ? "/person" : "/group"}
-          </span>
-          {parseFloat(activity.extra_person_charge || "0") > 0 && (
-            <span className="text-yellow-400 text-[10px] font-medium flex items-center gap-0.5">
-              <UserPlus size={9} />
-              +₹{parseFloat(activity.extra_person_charge!).toLocaleString()} extra/person
-            </span>
-          )}
-          {activity.min_age != null && activity.min_age > 0 && (
-            <span className="text-orange-400 text-[10px] font-medium flex items-center gap-0.5">
-              <Baby size={9} />
-              {activity.min_age}+ yrs
-            </span>
-          )}
-          <span className="text-muted-foreground text-xs hidden sm:inline">· {activity.duration}</span>
-        </div>
-      </div>
-      <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border transition-all
-        ${added
-          ? "border-accent bg-accent text-white"
-          : "border-border/60 bg-background text-muted-foreground"
-        }`}>
-        {added ? <Check size={15} /> : <Plus size={15} />}
-      </div>
-    </div>
+      )}
+    </>
   )
 })
 
 // ─── Counter Buttons ──────────────────────────────────────────────
+
 function CounterButton({
   onPress, disabled, children,
 }: {
