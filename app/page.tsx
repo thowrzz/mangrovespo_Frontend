@@ -1,5 +1,4 @@
 import { HeroSection } from '@/components/hero-section'
-import { OfferPopup } from '@/components/offer-popup'
 import { ActivitiesSection } from '@/components/activities-section'
 import { WhyUsSection } from '@/components/why-us-section'
 import { LocationMapSection } from '@/components/location-map-section'
@@ -14,7 +13,6 @@ import { MobileBottomBar } from '@/components/mobile-bottom-bar'
 export default function Home() {
   return (
     <main className="bg-background">
-      <OfferPopup />
       <HeroSection />
       <ActivitiesSection />
       <WhyUsSection />
