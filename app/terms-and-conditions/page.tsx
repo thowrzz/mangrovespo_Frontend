@@ -139,7 +139,7 @@ export default function TermsAndConditionsPage() {
             </div>
           </div>
           <p className="text-sm sm:text-base text-white/90 leading-relaxed pl-1 sm:pl-13">
-            Mangrove Spot (and operator Majestic Munroe) is not responsible for personal injury, loss of personal belongings, damage to electronics, or events beyond our reasonable control. Guests are advised to keep valuables and non-waterproof items safe.
+            Mangrove Spot is not responsible for personal injury, loss of personal belongings, damage to electronics, or events beyond our reasonable control. Guests are advised to keep valuables and non-waterproof items safe.
           </p>
         </section>
 

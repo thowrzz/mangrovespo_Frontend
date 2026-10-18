@@ -87,7 +87,7 @@ const FAQ_LIST: FAQItem[] = [
   {
     id: "q10",
     category: "Visit & Logistics",
-    question: "What's the best season to visit Munroe Island & Paravur backwaters?",
+    question: "What's the best season to visit Paravur backwaters & mangroves?",
     answer:
       "October to March is ideal for cool weather and bird watching. However, canoe and kayak rides through the lush canopy canals during the monsoon season (June to September) are also deeply magical and green.",
   },
