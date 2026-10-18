@@ -1217,7 +1217,7 @@ function TermsAndConditionsModal({ open, onClose }: { open: boolean; onClose: ()
             <p className="font-bold text-white text-xs uppercase tracking-wider">Cancellation &amp; Refund Policy</p>
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
               <div className="bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg">
-                <p className="text-emerald-400 font-bold">100% Refund</p>
+                <p className="text-emerald-400 font-bold">80% Refund</p>
                 <p className="text-muted-foreground text-[10px]">72+ hrs before</p>
               </div>
               <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg">

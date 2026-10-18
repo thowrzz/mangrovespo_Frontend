@@ -18,7 +18,7 @@ import { Footer } from "@/components/footer"
 export const metadata: Metadata = {
   title: "Cancellation & Refund Policy | MangroveSpot Adventures",
   description:
-    "Review MangroveSpot's cancellation and refund guidelines. Clear terms: 100% refund for 72+ hours, 50% for 48–72 hours, and free weather rescheduling.",
+    "Review MangroveSpot's cancellation and refund guidelines. Clear terms: 80% refund for 72+ hours, 50% for 48–72 hours, and free weather rescheduling.",
   alternates: { canonical: "https://www.mangrovespot.in/cancellation-policy" },
   openGraph: {
     title: "Cancellation & Refund Policy | MangroveSpot Adventures",
@@ -72,16 +72,16 @@ export default function CancellationPolicyPage() {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                 <CheckCircle2 size={13} />
-                <span>Full Refund</span>
+                <span>80% Refund</span>
               </div>
-              <p className="text-3xl font-extrabold text-white">100%</p>
+              <p className="text-3xl font-extrabold text-white">80%</p>
               <h2 className="text-base font-semibold text-white">72+ Hours Before</h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Cancel at least 72 hours prior to your scheduled activity start time to receive a full 100% refund of your advance payment.
+                Cancel at least 72 hours prior to your scheduled activity start time to receive an 80% refund of your advance payment.
               </p>
             </div>
             <div className="mt-4 pt-4 border-t border-border/50 text-xs text-emerald-400 font-medium">
-              Zero cancellation fee
+              20% standard cancellation fee
             </div>
           </div>
 
