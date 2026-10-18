@@ -1169,6 +1169,99 @@ function OrderSummary({ items, visitDate, arrivalTime, totalAmount, compact = fa
   )
 }
 
+// ─── Terms & Conditions Modal ─────────────────────────────────────
+function TermsAndConditionsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card border border-border rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border bg-card/80">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-accent/10 border border-accent/20 text-accent">
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white">Terms &amp; Cancellation Policy</h3>
+              <p className="text-xs text-muted-foreground">MangroveSpot Adventures</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm text-white/90 leading-relaxed">
+          <div className="bg-accent/5 border border-accent/20 rounded-xl p-3.5 space-y-2">
+            <p className="font-bold text-accent text-xs uppercase tracking-wider">Safety &amp; Booking Terms</p>
+            <ul className="space-y-1.5 text-xs text-white/80">
+              <li>• <strong>Safety First:</strong> Certified life jackets must be worn at all times during boating. Follow crew instructions.</li>
+              <li>• <strong>Eligibility:</strong> Children under 10 must be accompanied by an adult. Disclose serious health issues beforehand.</li>
+              <li>• <strong>Booking:</strong> 50% advance payment required online; balance 50% paid at venue.</li>
+              <li>• <strong>Weather Policy:</strong> Safe conditions required. We reserve the right to delay or reschedule with free rebooking.</li>
+              <li>• <strong>Liability:</strong> Mangrove Spot is not liable for personal injury, lost belongings, or events beyond control.</li>
+              <li>• <strong>Conduct:</strong> Alcohol, drugs, and disruptive behavior are strictly prohibited.</li>
+            </ul>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-3.5 space-y-2">
+            <p className="font-bold text-white text-xs uppercase tracking-wider">Cancellation &amp; Refund Policy</p>
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg">
+                <p className="text-emerald-400 font-bold">100% Refund</p>
+                <p className="text-muted-foreground text-[10px]">72+ hrs before</p>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg">
+                <p className="text-amber-400 font-bold">50% Refund</p>
+                <p className="text-muted-foreground text-[10px]">48–72 hrs before</p>
+              </div>
+              <div className="bg-rose-500/10 border border-rose-500/20 p-2 rounded-lg">
+                <p className="text-rose-400 font-bold">0% Refund</p>
+                <p className="text-muted-foreground text-[10px]">0–48 hrs / No show</p>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground pt-1">
+              Weather / Force Majeure: Free rescheduling to another date, subject to availability.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-muted-foreground">
+            <span>Read full official policies:</span>
+            <div className="flex gap-2">
+              <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-accent underline hover:text-accent/80 font-medium">
+                Terms &amp; Conditions ↗
+              </a>
+              <span>·</span>
+              <a href="/cancellation-policy" target="_blank" rel="noopener noreferrer" className="text-accent underline hover:text-accent/80 font-medium">
+                Cancellation Policy ↗
+              </a>
+              <span>·</span>
+              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-accent underline hover:text-accent/80 font-medium">
+                Privacy Policy ↗
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-border bg-card/60">
+          <Button onClick={onClose} className="w-full bg-accent hover:bg-accent/90 text-white font-semibold">
+            I Understand &amp; Agree
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Details / Payment Step ───────────────────────────────────────
 function DetailsStep({ register, errors, handleSubmit, onSubmit, submitting, totalAmount, items, visitDate, arrivalTime, onBack }: {
   register: any; errors: any; handleSubmit: any; onSubmit: any; submitting: boolean; totalAmount: number
@@ -1176,62 +1269,135 @@ function DetailsStep({ register, errors, handleSubmit, onSubmit, submitting, tot
 }) {
   const payNow     = Math.ceil(totalAmount / 2)
   const payArrival = totalAmount - payNow
+  const [agreedToTerms, setAgreedToTerms] = useState(true)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    if (!agreedToTerms) {
+      toast.error("Please review and accept the Terms & Conditions to proceed.")
+      e.preventDefault()
+      return
+    }
+    handleSubmit(onSubmit)(e)
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <OrderSummary items={items} visitDate={visitDate} arrivalTime={arrivalTime} totalAmount={totalAmount} compact />
+    <>
+      <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
+        <OrderSummary items={items} visitDate={visitDate} arrivalTime={arrivalTime} totalAmount={totalAmount} compact />
 
-      <div className="flex flex-col gap-3">
-        <p className="text-white text-sm font-bold">Your Details</p>
-        {[
-          { name: "customer_name"  as const, label: "Full Name",     placeholder: "e.g. Adarsh Kumar",      type: "text",  mode: "text",    auto: "name"  },
-          { name: "customer_email" as const, label: "Email Address", placeholder: "your@email.com",          type: "email", mode: "email",   auto: "email" },
-          { name: "customer_phone" as const, label: "Phone Number",  placeholder: "10-digit mobile number", type: "tel",   mode: "numeric", auto: "tel"   },
-        ].map(f => (
-          <div key={f.name}>
-            <Label className="text-xs text-muted-foreground">{f.label}</Label>
-            <Input
-              {...register(f.name)} type={f.type} placeholder={f.placeholder}
-              className="mt-1 bg-background border-border h-11"
-              autoComplete={f.auto} inputMode={f.mode as any}
-              {...(f.name === "customer_phone" ? { maxLength: 10 } : {})}
-            />
-            {errors[f.name] && <p className="text-red-400 text-xs mt-1">{errors[f.name].message}</p>}
+        <div className="flex flex-col gap-3">
+          <p className="text-white text-sm font-bold">Your Details</p>
+          {[
+            { name: "customer_name"  as const, label: "Full Name",     placeholder: "e.g. Adarsh Kumar",      type: "text",  mode: "text",    auto: "name"  },
+            { name: "customer_email" as const, label: "Email Address", placeholder: "your@email.com",          type: "email", mode: "email",   auto: "email" },
+            { name: "customer_phone" as const, label: "Phone Number",  placeholder: "10-digit mobile number", type: "tel",   mode: "numeric", auto: "tel"   },
+          ].map(f => (
+            <div key={f.name}>
+              <Label className="text-xs text-muted-foreground">{f.label}</Label>
+              <Input
+                {...register(f.name)} type={f.type} placeholder={f.placeholder}
+                className="mt-1 bg-background border-border h-11"
+                autoComplete={f.auto} inputMode={f.mode as any}
+                {...(f.name === "customer_phone" ? { maxLength: 10 } : {})}
+              />
+              {errors[f.name] && <p className="text-red-400 text-xs mt-1">{errors[f.name].message}</p>}
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-accent/5 border border-accent/20 rounded-xl p-3.5 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Wallet size={14} className="text-accent" />
+            <p className="text-accent text-xs font-bold">50% Advance · 50% at Arrival</p>
           </div>
-        ))}
-      </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Pay online now</span>
+            <span className="text-white font-bold tabular-nums">₹{payNow.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Pay at the venue</span>
+            <span className="text-yellow-400 font-medium tabular-nums">₹{payArrival.toLocaleString()}</span>
+          </div>
+          <div className="h-px bg-border my-0.5" />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Total booking value</span>
+            <span className="tabular-nums">₹{totalAmount.toLocaleString()}</span>
+          </div>
+        </div>
 
-      <div className="bg-accent/5 border border-accent/20 rounded-xl p-3.5 flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Wallet size={14} className="text-accent" />
-          <p className="text-accent text-xs font-bold">50% Advance · 50% at Arrival</p>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Pay online now</span>
-          <span className="text-white font-bold tabular-nums">₹{payNow.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Pay at the venue</span>
-          <span className="text-yellow-400 font-medium tabular-nums">₹{payArrival.toLocaleString()}</span>
-        </div>
-        <div className="h-px bg-border my-0.5" />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Total booking value</span>
-          <span className="tabular-nums">₹{totalAmount.toLocaleString()}</span>
-        </div>
-      </div>
+        {/* ─── Terms & Conditions Acceptance Section ─── */}
+        <div className="bg-card border border-border/80 rounded-xl p-3.5 space-y-2.5">
+          <div className="flex items-start gap-2.5">
+            <input
+              id="terms-checkbox"
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-border text-accent focus:ring-accent accent-[#16a34a] cursor-pointer"
+            />
+            <label htmlFor="terms-checkbox" className="text-xs text-white/90 leading-relaxed cursor-pointer select-none">
+              I agree to the{" "}
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-accent underline font-semibold hover:text-accent/80"
+              >
+                Terms &amp; Conditions
+              </button>
+              {" "}and{" "}
+              <a
+                href="/cancellation-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline font-semibold hover:text-accent/80"
+              >
+                Cancellation Policy
+              </a>
+            </label>
+          </div>
 
-      <div className="flex gap-2">
-        <Button type="button" variant="ghost" onClick={onBack} className="flex-1 border border-border text-muted-foreground hover:text-white">← Back</Button>
-        <Button type="submit" disabled={submitting} className="flex-1 bg-accent hover:bg-accent/90 text-white font-bold py-5 text-base disabled:opacity-40 active:scale-[0.98] transition-all">
-          {submitting
-            ? <><Loader2 size={15} className="animate-spin mr-1.5" />Creating order...</>
-            : <>Pay ₹{payNow.toLocaleString()} →</>
-          }
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground text-center">🔒 Secure checkout via Razorpay · Balance paid at venue</p>
-    </form>
+          <div className="flex items-center justify-between pt-1 border-t border-border/40 text-xs">
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="inline-flex items-center gap-1.5 text-accent hover:underline font-medium py-0.5"
+            >
+              <ShieldCheck size={14} />
+              <span>Terms &amp; Conditions Policy</span>
+            </button>
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-muted-foreground hover:text-white transition"
+            >
+              Privacy Policy ↗
+            </a>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button type="button" variant="ghost" onClick={onBack} className="flex-1 border border-border text-muted-foreground hover:text-white">← Back</Button>
+          <Button
+            type="submit"
+            disabled={submitting || !agreedToTerms}
+            className="flex-1 bg-accent hover:bg-accent/90 text-white font-bold py-5 text-base disabled:opacity-40 active:scale-[0.98] transition-all"
+          >
+            {submitting
+              ? <><Loader2 size={15} className="animate-spin mr-1.5" />Creating order...</>
+              : <>Pay ₹{payNow.toLocaleString()} →</>
+            }
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">🔒 Secure checkout via Razorpay · Balance paid at venue</p>
+      </form>
+
+      <TermsAndConditionsModal
+        open={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
+    </>
   )
 }
 

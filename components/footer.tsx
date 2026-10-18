@@ -127,23 +127,34 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Quick Links</h3>
+            <h3 className="text-lg font-semibold text-white">Quick Links &amp; Policies</h3>
             <div className="space-y-2">
               <Link href="/#activities" className="block text-muted-foreground hover:text-accent transition text-sm">All Activities</Link>
-              <Link href="/booking" className="block text-muted-foreground hover:text-accent transition text-sm">Book Now</Link>
+              <Link href="/booking" className="block text-muted-foreground hover:text-accent transition text-sm">Book Online</Link>
+              <Link href="/faqs" className="block text-muted-foreground hover:text-accent transition text-sm">FAQs</Link>
+              <Link href="/terms-and-conditions" className="block text-muted-foreground hover:text-accent transition text-sm">Terms &amp; Conditions</Link>
+              <Link href="/cancellation-policy" className="block text-muted-foreground hover:text-accent transition text-sm">Cancellation Policy</Link>
+              <Link href="/privacy-policy" className="block text-muted-foreground hover:text-accent transition text-sm">Privacy Policy</Link>
               <Link href="/blog" className="block text-muted-foreground hover:text-accent transition text-sm">Travel Blog</Link>
-              <Link href="/#why-us" className="block text-muted-foreground hover:text-accent transition text-sm">Why MangroveSpot</Link>
-              <Link href="/#reviews" className="block text-muted-foreground hover:text-accent transition text-sm">Guest Reviews</Link>
-              <Link href="/#gallery" className="block text-muted-foreground hover:text-accent transition text-sm">Photo Gallery</Link>
-         
             </div>
           </div>
 
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-border pt-6 text-center text-muted-foreground text-sm flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} MangroveSpot Adventures · Nedungolam, Paravur, Kollam, Kerala. All rights reserved.</p>
+        <div className="border-t border-border pt-6 text-center text-muted-foreground text-xs sm:text-sm flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xs">
+            <p>© {new Date().getFullYear()} MangroveSpot Adventures · Nedungolam, Paravur, Kollam.</p>
+            <div className="flex items-center gap-2.5 text-muted-foreground/80">
+              <Link href="/terms-and-conditions" className="hover:text-accent transition">Terms</Link>
+              <span>·</span>
+              <Link href="/cancellation-policy" className="hover:text-accent transition">Cancellation</Link>
+              <span>·</span>
+              <Link href="/privacy-policy" className="hover:text-accent transition">Privacy</Link>
+              <span>·</span>
+              <Link href="/faqs" className="hover:text-accent transition">FAQs</Link>
+            </div>
+          </div>
           <p className="text-xs text-muted-foreground/60">
             Developed by{' '}
             <a 

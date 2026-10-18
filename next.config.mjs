@@ -89,6 +89,31 @@ const nextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/terms",
+        destination: "/terms-and-conditions",
+        permanent: true,
+      },
+      {
+        source: "/privacy",
+        destination: "/privacy-policy",
+        permanent: true,
+      },
+      {
+        source: "/cancellation",
+        destination: "/cancellation-policy",
+        permanent: true,
+      },
+      {
+        source: "/refund-policy",
+        destination: "/cancellation-policy",
+        permanent: true,
+      },
+      {
+        source: "/faq",
+        destination: "/faqs",
+        permanent: true,
+      },
     ]
   },
 }

@@ -97,6 +97,7 @@ export function BookingModal({ activity, open, onClose }: Props) {
   const [numAdults,     setNumAdults]     = useState(activity.min_persons)
   const [numChildren,   setNumChildren]   = useState(0)
   const [bookingResult, setBookingResult] = useState<BookingInitiateResponse | null>(null)
+  const [agreedToTerms, setAgreedToTerms] = useState(true)
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -423,11 +424,48 @@ export function BookingModal({ activity, open, onClose }: Props) {
               </div>
             </div>
 
+            {/* Terms & Conditions agreement */}
+            <div className="bg-card border border-border/80 rounded-xl p-3 space-y-1.5 text-xs">
+              <div className="flex items-start gap-2">
+                <input
+                  id="modal-terms-checkbox"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5 w-3.5 h-3.5 rounded border-border text-accent accent-[#16a34a] cursor-pointer"
+                />
+                <label htmlFor="modal-terms-checkbox" className="text-white/90 leading-tight cursor-pointer select-none">
+                  I agree to the{" "}
+                  <a
+                    href="/terms-and-conditions"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent underline font-semibold hover:text-accent/80"
+                  >
+                    Terms &amp; Conditions
+                  </a>
+                  {" "}and{" "}
+                  <a
+                    href="/cancellation-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent underline font-semibold hover:text-accent/80"
+                  >
+                    Cancellation Policy
+                  </a>
+                </label>
+              </div>
+            </div>
+
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => setStep("arrival")} className="flex-1">
                 ← Back
               </Button>
-              <Button type="submit" className="flex-1 bg-accent hover:bg-accent/90 font-semibold">
+              <Button
+                type="submit"
+                disabled={!agreedToTerms}
+                className="flex-1 bg-accent hover:bg-accent/90 font-semibold disabled:opacity-40"
+              >
                 Pay ₹{payNow.toLocaleString()} Now
               </Button>
             </div>
